@@ -1,7 +1,7 @@
 from datetime import datetime
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from database import supabase
 
 app = FastAPI(title="De Passagem API", version="1.0.0")
@@ -15,6 +15,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Estruturas de dados das requisições
 class SolicitarCorridaRequest(BaseModel):
     usuario_id: str
     origem_endereco: str
@@ -30,6 +31,13 @@ class SolicitarCorridaRequest(BaseModel):
 class FinalizarCorridaRequest(BaseModel):
     corrida_id: str
     motorista_id: str
+
+class AvaliarCorridaRequest(BaseModel):
+    corrida_id: str
+    avaliador_id: str
+    avaliado_id: str
+    nota: int = Field(..., ge=1, le=5)  # Nota obrigatória entre 1 e 5
+    comentario: str = None
 
 @app.get("/")
 def status_api():
@@ -90,4 +98,22 @@ def finalizar_corrida(dados: FinalizarCorridaRequest):
         "mensagem": "Corrida finalizada com sucesso!",
         "corrida_id": dados.corrida_id,
         "proximo_passo": "abrir_tela_avaliacao"
+    }
+
+@app.post("/corridas/avaliar")
+def avaliar_corrida(dados: AvaliarCorridaRequest):
+    # 1. Registra a avaliação na tabela 'avaliacoes'
+    nova_avaliacao = {
+        "corrida_id": dados.corrida_id,
+        "avaliador_id": dados.avaliador_id,
+        "avaliado_id": dados.avaliado_id,
+        "nota": dados.nota,
+        "comentario": dados.comentario
+    }
+    
+    resposta = supabase.table("avaliacoes").insert(nova_avaliacao).execute()
+    
+    return {
+        "mensagem": "Avaliação registrada com sucesso!",
+        "detalhes": resposta.data[0]
     }
