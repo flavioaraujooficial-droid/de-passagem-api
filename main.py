@@ -1,3 +1,4 @@
+from datetime import datetime
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -25,6 +26,10 @@ class SolicitarCorridaRequest(BaseModel):
     distancia_km: float
     tipo_modalidade: str
     quantidade_paradas: int = 0
+
+class FinalizarCorridaRequest(BaseModel):
+    corrida_id: str
+    motorista_id: str
 
 @app.get("/")
 def status_api():
@@ -68,3 +73,21 @@ def solicitar_corrida(dados: SolicitarCorridaRequest):
 
     resposta = supabase.table("corridas").insert(nova_corrida).execute()
     return {"mensagem": "Corrida solicitada com sucesso!", "detalhes": resposta.data[0]}
+
+@app.post("/corridas/finalizar")
+def finalizar_corrida(dados: FinalizarCorridaRequest):
+    # 1. Encerra a corrida no banco de dados
+    corrida_res = supabase.table("corridas").update({
+        "status": "finalizada"
+    }).eq("id", dados.corrida_id).execute()
+
+    # 2. Libera o motorista para ficar 'online' novamente
+    supabase.table("motoristas").update({
+        "status": "online"
+    }).eq("id", dados.motorista_id).execute()
+
+    return {
+        "mensagem": "Corrida finalizada com sucesso!",
+        "corrida_id": dados.corrida_id,
+        "proximo_passo": "abrir_tela_avaliacao"
+    }
