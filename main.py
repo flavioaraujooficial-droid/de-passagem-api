@@ -15,7 +15,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Estruturas de dados das requisições
+# --- Estruturas de dados ---
 class SolicitarCorridaRequest(BaseModel):
     usuario_id: str
     origem_endereco: str
@@ -36,16 +36,27 @@ class AvaliarCorridaRequest(BaseModel):
     corrida_id: str
     avaliador_id: str
     avaliado_id: str
-    nota: int = Field(..., ge=1, le=5)  # Nota obrigatória entre 1 e 5
+    nota: int = Field(..., ge=1, le=5)
     comentario: str = None
 
+class AprovarMotoristaRequest(BaseModel):
+    motorista_id: str
+    aprovado: bool
+
+class AtualizarTarifasRequest(BaseModel):
+    taxa_fixa_minima_app: float
+    porcentagem_app_longa_distancia: float
+    tarifa_km_base: float
+    taxa_adicional_parada: float
+
+# --- Rota Inicial ---
 @app.get("/")
 def status_api():
     return {"status": "online", "sistema": "De Passagem", "cidade": "Alagoinhas/BA"}
 
+# --- Rotas do Passageiro e Motorista ---
 @app.post("/corridas/solicitar")
 def solicitar_corrida(dados: SolicitarCorridaRequest):
-    # Busca configurações atualizadas no Supabase
     config_res = supabase.table("configuracoes_sistema").select("*").limit(1).execute()
     config = config_res.data[0]
     
@@ -54,10 +65,7 @@ def solicitar_corrida(dados: SolicitarCorridaRequest):
     porcentagem_app = float(config["porcentagem_app_longa_distancia"]) / 100
     valor_por_parada = float(config["taxa_adicional_parada"])
     
-    # Cálculo bruto do valor da corrida
     valor_bruto = (dados.distancia_km * tarifa_km_base) + (dados.quantidade_paradas * valor_por_parada)
-    
-    # Aplica a regra de taxa mista da plataforma (R$ 2,00 ou 12%)
     taxa_12 = valor_bruto * porcentagem_app
     taxa_plataforma = taxa_fixa_app if taxa_12 < taxa_fixa_app else taxa_12
     valor_liquido_motorista = valor_bruto - taxa_plataforma
@@ -84,25 +92,12 @@ def solicitar_corrida(dados: SolicitarCorridaRequest):
 
 @app.post("/corridas/finalizar")
 def finalizar_corrida(dados: FinalizarCorridaRequest):
-    # 1. Encerra a corrida no banco de dados
-    corrida_res = supabase.table("corridas").update({
-        "status": "finalizada"
-    }).eq("id", dados.corrida_id).execute()
-
-    # 2. Libera o motorista para ficar 'online' novamente
-    supabase.table("motoristas").update({
-        "status": "online"
-    }).eq("id", dados.motorista_id).execute()
-
-    return {
-        "mensagem": "Corrida finalizada com sucesso!",
-        "corrida_id": dados.corrida_id,
-        "proximo_passo": "abrir_tela_avaliacao"
-    }
+    supabase.table("corridas").update({"status": "finalizada"}).eq("id", dados.corrida_id).execute()
+    supabase.table("motoristas").update({"status": "online"}).eq("id", dados.motorista_id).execute()
+    return {"mensagem": "Corrida finalizada com sucesso!", "corrida_id": dados.corrida_id}
 
 @app.post("/corridas/avaliar")
 def avaliar_corrida(dados: AvaliarCorridaRequest):
-    # 1. Registra a avaliação na tabela 'avaliacoes'
     nova_avaliacao = {
         "corrida_id": dados.corrida_id,
         "avaliador_id": dados.avaliador_id,
@@ -110,10 +105,49 @@ def avaliar_corrida(dados: AvaliarCorridaRequest):
         "nota": dados.nota,
         "comentario": dados.comentario
     }
-    
     resposta = supabase.table("avaliacoes").insert(nova_avaliacao).execute()
+    return {"mensagem": "Avaliação registrada com sucesso!", "detalhes": resposta.data[0]}
+
+# --- ROTAS ADMINISTRATIVAS (Painel do Gestor) ---
+
+@app.get("/admin/dashboard")
+def resumo_dashboard():
+    # Busca resumo de métricas para o painel
+    corridas = supabase.table("corridas").select("*").execute().data
+    motoristas = supabase.table("motoristas").select("*").execute().data
     
+    total_corridas = len(corridas)
+    faturamento_bruto = sum(float(c.get("valor_bruto", 0)) for c in corridas if c.get("status") == "finalizada")
+    receita_plataforma = sum(float(c.get("taxa_plataforma", 0)) for c in corridas if c.get("status") == "finalizada")
+    motoristas_online = len([m for m in motoristas if m.get("status") == "online"])
+
     return {
-        "mensagem": "Avaliação registrada com sucesso!",
-        "detalhes": resposta.data[0]
+        "total_corridas": total_corridas,
+        "faturamento_bruto": round(faturamento_bruto, 2),
+        "receita_plataforma": round(receita_plataforma, 2),
+        "motoristas_online": motoristas_online
     }
+
+@app.get("/admin/motoristas")
+def listar_motoristas():
+    resposta = supabase.table("motoristas").select("*").execute()
+    return {"motoristas": resposta.data}
+
+@app.post("/admin/motoristas/aprovar")
+def aprovar_motorista(dados: AprovarMotoristaRequest):
+    novo_status = "online" if dados.aprovado else "bloqueado"
+    resposta = supabase.table("motoristas").update({"status": novo_status}).eq("id", dados.motorista_id).execute()
+    return {"mensagem": f"Status do motorista atualizado para {novo_status}!", "detalhes": resposta.data}
+
+@app.post("/admin/tarifas/atualizar")
+def atualizar_tarifas(dados: AtualizarTarifasRequest):
+    novas_config = {
+        "taxa_fixa_minima_app": dados.taxa_fixa_minima_app,
+        "porcentagem_app_longa_distancia": dados.porcentagem_app_longa_distancia,
+        "tarifa_km_base": dados.tarifa_km_base,
+        "taxa_adicional_parada": dados.taxa_adicional_parada
+    }
+    # Atualiza a primeira linha da tabela de configurações
+    config_id = supabase.table("configuracoes_sistema").select("id").limit(1).execute().data[0]["id"]
+    resposta = supabase.table("configuracoes_sistema").update(novas_config).eq("id", config_id).execute()
+    return {"mensagem": "Tarifas atualizadas com sucesso!", "configuracoes": resposta.data[0]}
