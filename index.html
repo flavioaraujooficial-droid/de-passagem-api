@@ -6,227 +6,208 @@
     <title>De Passagem - Mobilidade Urbana</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        .fade-exit { opacity: 0; transform: scale(0.95); transition: all 0.4s ease-in-out; pointer-events: none; }
-    </style>
 </head>
-<body class="bg-slate-900 text-white font-sans antialiased overflow-x-hidden">
+<body class="bg-slate-900 text-white font-sans antialiased overflow-x-hidden" onload="obterLocalizacaoGPS()">
 
-    <!-- 1. SPLASH SCREEN / APRESENTAÇÃO -->
-    <div id="splash-screen" onclick="abrirApp()" class="fixed inset-0 z-50 bg-[#0A1128] flex flex-col items-center justify-between p-6 cursor-pointer select-none">
-        <div class="flex-1 flex flex-col items-center justify-center text-center max-w-sm w-full">
-            <div class="relative mb-4">
-                <div class="w-40 h-40 rounded-full bg-amber-500/10 absolute -inset-2 blur-xl"></div>
-                <div class="relative w-32 h-32 bg-amber-500 rounded-full flex items-center justify-center mx-auto shadow-2xl">
-                    <span class="text-slate-950 font-black text-4xl tracking-tighter">DP</span>
-                </div>
-            </div>
-            <h1 class="text-3xl font-extrabold tracking-wider text-white mt-2">DE PASSAGEM</h1>
-            <p class="text-amber-400 font-medium text-xs tracking-widest mt-1 uppercase">Mobilidade que conecta. Respeito que transforma.</p>
-        </div>
-        <div class="w-full max-w-md space-y-4 mb-4">
-            <p class="text-[11px] font-bold text-center text-amber-400 animate-pulse">👉 Toque em qualquer lugar para acessar</p>
-        </div>
-    </div>
-
-    <!-- ESTRUTURA PRINCIPAL -->
-    <main id="app-screen" class="min-h-screen flex flex-col max-w-md mx-auto bg-slate-950 relative">
-        <header class="p-4 bg-slate-900 border-b border-slate-800 flex justify-between items-center">
+    <main id="app-screen" class="min-h-screen flex flex-col max-w-md mx-auto bg-slate-950 relative p-4 space-y-4">
+        
+        <header class="p-3 bg-slate-900 rounded-2xl border border-slate-800 flex justify-between items-center">
             <span class="font-bold text-amber-400 text-lg">De Passagem</span>
-            <div id="usuario-avatar" class="hidden w-8 h-8 rounded-full bg-amber-500 text-slate-950 font-bold flex items-center justify-center text-sm">F</div>
+            <span id="status-gps-txt" class="text-xs text-amber-400 font-semibold animate-pulse">📍 Buscando GPS...</span>
         </header>
 
-        <section class="p-4 space-y-4">
+        <!-- BUSCADOR -->
+        <div id="painel-busca" class="bg-slate-900 p-4 rounded-2xl border border-slate-800 shadow-xl space-y-4">
             
-            <!-- 2. TELA DE LOGIN / CADASTRO DO PASSAGEIRO -->
-            <div id="painel-auth" class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl space-y-4">
-                <div class="text-center space-y-1">
-                    <h2 class="text-xl font-bold text-white">Identificação do Passageiro</h2>
-                    <p class="text-xs text-gray-400">Entre com seus dados para solicitar viagens em Alagoinhas</p>
+            <div class="space-y-1">
+                <label class="text-xs font-bold text-amber-400 flex items-center gap-1">
+                    <i class="fa-solid fa-location-dot"></i> Ponto de Embarque (GPS Automático):
+                </label>
+                <input id="input-origem" type="text" value="Obtendo sua localização em Alagoinhas..." class="w-full bg-slate-950 border border-amber-500/50 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
+                <div class="bg-amber-500/10 border border-amber-500/20 p-2 rounded-lg text-[10px] text-amber-300 mt-1 flex items-center gap-1.5">
+                    <i class="fa-solid fa-triangle-exclamation text-amber-400"></i>
+                    <span><b>Confira seu endereço!</b> Evite que o motorista vá para o lugar errado.</span>
                 </div>
+            </div>
 
-                <form onsubmit="autenticarPassageiro(event)" class="space-y-3">
-                    <div>
-                        <label class="text-xs font-semibold text-gray-300">Seu Nome:</label>
-                        <input id="auth-nome" type="text" placeholder="Ex: Flávio Araújo" required class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-400">
-                    </div>
-                    <div>
-                        <label class="text-xs font-semibold text-gray-300">WhatsApp / Telefone:</label>
-                        <input id="auth-telefone" type="tel" placeholder="(75) 99999-9999" required class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-400">
-                    </div>
-                    <div>
-                        <label class="text-xs font-semibold text-gray-300">Senha:</label>
-                        <input id="auth-senha" type="password" placeholder="Sua senha" required class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-400">
-                    </div>
-
-                    <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded-xl text-sm transition shadow-lg mt-2">
-                        Entrar e Continuar
+            <div class="space-y-1">
+                <label class="text-xs font-semibold text-gray-300">Para onde você vai?</label>
+                <div class="relative">
+                    <input id="input-destino" type="text" placeholder="Digite o destino (ex: UNEB Alagoinhas)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-400">
+                    <button onclick="calcularCorridaReal()" class="absolute right-2 top-2 bg-amber-500 text-slate-950 font-bold text-xs px-3 py-1.5 rounded-lg active:scale-95 transition">
+                        Calcular R$
                     </button>
-                </form>
-            </div>
-
-            <!-- 3. PAINEL DE SOLICITAÇÃO (OCULTO ATÉ O LOGIN) -->
-            <div id="painel-busca" class="hidden bg-slate-900 p-4 rounded-2xl border border-slate-800 shadow-xl space-y-3">
-                <h2 class="text-lg font-bold text-white">Para onde vamos hoje, <span id="nome-exibicao" class="text-amber-400">--</span>?</h2>
-                
-                <div class="space-y-2">
-                    <div class="flex justify-between items-center">
-                        <label class="text-xs font-semibold text-gray-300">Ponto de Origem / Embarque:</label>
-                        <button onclick="obterGPS()" class="text-[11px] text-amber-400 hover:underline flex items-center gap-1 font-bold">
-                            <i class="fa-solid fa-location-crosshairs"></i> GPS Automático
-                        </button>
-                    </div>
-                    <input id="input-origem" type="text" placeholder="Ex: Residencial Neuci Pereira, Conselheiro Junqueira" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-400">
-                    
-                    <div class="grid grid-cols-2 gap-2 pt-1">
-                        <input id="input-bloco" type="text" placeholder="Bloco / Ap (Opção)" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400">
-                        <input id="input-referencia" type="text" placeholder="Ponto de Ref. / Portaria" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400">
-                    </div>
-                </div>
-
-                <div class="space-y-1 pt-2">
-                    <label class="text-xs font-semibold text-gray-300">Seu Destino:</label>
-                    <div class="relative">
-                        <input id="input-destino" type="text" placeholder="Digite seu destino em Alagoinhas..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-400">
-                        <button onclick="realizarBusca()" class="absolute right-2 top-2 bg-amber-500 text-slate-950 font-semibold text-xs px-3 py-1.5 rounded-lg active:scale-95 transition">Buscar</button>
-                    </div>
                 </div>
             </div>
 
-            <!-- CARD DE ESTIMATIVA -->
-            <div id="card-resultado" class="hidden bg-slate-900 p-4 rounded-2xl border border-amber-500/50 space-y-3">
-                <div class="flex justify-between items-center">
-                    <span class="text-xs text-gray-400 uppercase tracking-wider">Estimativa de Viagem</span>
-                    <span class="bg-amber-500/20 text-amber-400 text-xs px-2 py-0.5 rounded-full font-bold">R$ 1,00 taxa fixa</span>
-                </div>
-                <div class="space-y-1 text-xs">
-                    <p id="res-origem" class="text-gray-300"></p>
-                    <p id="res-destino" class="font-bold text-amber-400 text-sm"></p>
-                </div>
-                <button onclick="solicitarCorridaAPI()" id="btn-confirmar" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded-xl text-sm transition shadow-lg">
-                    Confirmar Solicitação
+            <!-- ATALHOS RÁPIDOS -->
+            <div class="grid grid-cols-2 gap-2 pt-1">
+                <button onclick="definirAtalho('UNEB Alagoinhas', 3.5)" class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-left text-xs hover:border-amber-500/40">
+                    <p class="font-bold text-white">🎓 UNEB</p>
+                    <p class="text-[10px] text-gray-400">~3.5 km • Alagoinhas</p>
+                </button>
+                <button onclick="definirAtalho('Centro - Praça Ruy Barbosa', 2.8)" class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-left text-xs hover:border-amber-500/40">
+                    <p class="font-bold text-white">🏙️ Centro</p>
+                    <p class="text-[10px] text-gray-400">~2.8 km • Alagoinhas</p>
                 </button>
             </div>
+        </div>
 
-            <!-- TELA DE STATUS EM TEMPO REAL -->
-            <div id="card-status-corrida" class="hidden bg-slate-900 p-5 rounded-2xl border-2 border-amber-500 space-y-4 text-center">
-                <div id="status-procurando" class="space-y-3 py-2">
-                    <div class="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-                    <h3 class="text-base font-bold text-white">Procurando motorista próximo...</h3>
-                    <p class="text-xs text-gray-400">Sua localização foi enviada para os condutores de Alagoinhas.</p>
+        <!-- ESTIMATIVA E MODALIDADES DE VALOR -->
+        <div id="card-resultado" class="hidden bg-slate-900 p-4 rounded-2xl border-2 border-amber-500 space-y-3 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                <span class="text-xs text-amber-400 uppercase font-bold">Opções de Viagem</span>
+                <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded font-bold">Alagoinhas/BA</span>
+            </div>
+
+            <div class="space-y-2 text-xs">
+                <p class="text-gray-300">Embarque: <span id="res-origem" class="font-semibold text-white"></span></p>
+                <p class="text-amber-400 font-bold">Destino: <span id="res-destino"></span></p>
+
+                <!-- OPÇÃO 1: EXCLUSIVA (PRESSA / INDIVIDUAL) -->
+                <div onclick="selecionarOpcao('exclusiva')" id="box-exclusiva" class="p-3 bg-slate-950 rounded-xl border-2 border-amber-500 cursor-pointer space-y-1 transition">
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-white">🔒 Viagem Individual (Com Pressa)</span>
+                        <span id="preco-exclusiva" class="font-black text-amber-400 text-sm">R$ 10,00</span>
+                    </div>
+                    <p class="text-[10px] text-gray-400">Você segue direto ao destino sem aguardar outras coletas.</p>
                 </div>
 
-                <div id="status-aceito" class="hidden space-y-3 text-left">
-                    <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-                        <span class="text-xs font-bold text-emerald-400 uppercase flex items-center gap-1">
-                            <i class="fa-solid fa-circle-check"></i> CORRIDA CONFIRMADA
-                        </span>
-                        <span class="text-xs text-gray-400">Chegada ~4 min</span>
+                <!-- OPÇÃO 2: COMPARTILHADA (MOBILIZAÇÃO / R$ 5) -->
+                <div onclick="selecionarOpcao('compartilhada')" id="box-compartilhada" class="p-3 bg-slate-950 rounded-xl border border-slate-800 cursor-pointer space-y-1 transition">
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-white">👥 Viagem Compartilhada (Zigue-Zague)</span>
+                        <span id="preco-compartilhada" class="font-black text-emerald-400 text-sm">R$ 5,00</span>
                     </div>
-                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-lg">🚗</div>
-                        <div>
-                            <p class="text-xs font-bold text-white">Motorista Parceiro</p>
-                            <p class="text-[10px] text-gray-400">Ford Fiesta • Alagoinhas</p>
-                        </div>
-                    </div>
-                    <p class="text-xs text-gray-300">Aguarde no ponto de embarque (Portaria Principal).</p>
-                    <button onclick="location.reload()" class="w-full bg-slate-800 hover:bg-slate-700 text-rose-400 font-bold py-2.5 rounded-xl text-xs transition">
-                        Cancelar Viagem
-                    </button>
+                    <p class="text-[10px] text-gray-400">Economize! O valor cai para R$ 5 ao formar lotação com outros passageiros na rota.</p>
                 </div>
             </div>
 
-        </section>
+            <button onclick="solicitarCorridaAPI()" id="btn-confirmar" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-3 rounded-xl text-sm transition shadow-lg mt-2">
+                CONFIRMAR VIAGEM (SELECIONADA)
+            </button>
+        </div>
+
+        <!-- STATUS EM TEMPO REAL -->
+        <div id="card-status-corrida" class="hidden bg-slate-900 p-5 rounded-2xl border-2 border-amber-500 space-y-4 text-center">
+            <div id="status-procurando" class="space-y-3 py-2">
+                <div class="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                <h3 class="text-base font-bold text-white">Buscando motorista na região...</h3>
+                <p id="status-modo-texto" class="text-xs text-gray-400">Aguardando motorista aceitar a chamada.</p>
+            </div>
+
+            <div id="status-aceito" class="hidden space-y-3 text-left">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                    <span class="text-xs font-bold text-emerald-400 uppercase">🟢 MOTORISTA À CAMINHO</span>
+                    <span class="text-xs text-gray-400">~4 min</span>
+                </div>
+                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-lg">🚗</div>
+                    <div>
+                        <p class="text-xs font-bold text-white">Motorista Parceiro</p>
+                        <p class="text-[10px] text-gray-400">Ford Fiesta • Alagoinhas</p>
+                    </div>
+                </div>
+                <button onclick="location.reload()" class="w-full bg-slate-800 text-rose-400 font-bold py-2 rounded-xl text-xs">
+                    Cancelar Viagem
+                </button>
+            </div>
+        </div>
+
     </main>
 
     <script>
-        let checagemInterval = null;
-        let usuarioAtual = null;
+        let modalidadeEscolhida = 'exclusiva';
+        let valorFinalCorrida = 10.00;
+        let kmGlobal = 0;
 
-        function abrirApp() {
-            const splash = document.getElementById('splash-screen');
-            splash.classList.add('fade-exit');
-            setTimeout(() => { splash.style.display = 'none'; }, 400);
-
-            // Verificar se o passageiro já está logado
-            const salvo = localStorage.getItem('depassagem_passageiro');
-            if (salvo) {
-                usuarioAtual = JSON.parse(salvo);
-                exibirPainelBusca();
+        // GEOLOCALIZAÇÃO AUTOMÁTICA DO NAVEGADOR
+        function obterLocalizacaoGPS() {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        document.getElementById('input-origem').value = `Alagoinhas/BA (GPS: ${lat.toFixed(4)}, ${lon.toFixed(4)})`;
+                        document.getElementById('status-gps-txt').innerText = "📍 GPS Conectado";
+                        document.getElementById('status-gps-txt').className = "text-xs text-emerald-400 font-semibold";
+                    },
+                    (error) => {
+                        document.getElementById('input-origem').value = "Alagoinhas/BA (Centro / Padrão)";
+                        document.getElementById('status-gps-txt').innerText = "📍 Alagoinhas";
+                        document.getElementById('status-gps-txt').className = "text-xs text-amber-400 font-semibold";
+                    },
+                    { enableHighAccuracy: true, timeout: 10000 }
+                );
+            } else {
+                document.getElementById('input-origem').value = "Alagoinhas/BA";
+                document.getElementById('status-gps-txt').innerText = "📍 Alagoinhas";
             }
         }
 
-        function autenticarPassageiro(event) {
-            event.preventDefault();
-            const nome = document.getElementById('auth-nome').value;
-            const telefone = document.getElementById('auth-telefone').value;
+        function selecionarOpcao(tipo) {
+            modalidadeEscolhida = tipo;
+            const boxExcl = document.getElementById('box-exclusiva');
+            const boxComp = document.getElementById('box-compartilhada');
 
-            usuarioAtual = { nome, telefone };
-            localStorage.setItem('depassagem_passageiro', JSON.stringify(usuarioAtual));
-            exibirPainelBusca();
+            if (tipo === 'exclusiva') {
+                boxExcl.className = "p-3 bg-slate-950 rounded-xl border-2 border-amber-500 cursor-pointer space-y-1 transition";
+                boxComp.className = "p-3 bg-slate-950 rounded-xl border border-slate-800 cursor-pointer space-y-1 transition";
+                valorFinalCorrida = 10.00;
+            } else {
+                boxComp.className = "p-3 bg-slate-950 rounded-xl border-2 border-emerald-500 cursor-pointer space-y-1 transition";
+                boxExcl.className = "p-3 bg-slate-950 rounded-xl border border-slate-800 cursor-pointer space-y-1 transition";
+                valorFinalCorrida = 5.00;
+            }
         }
 
-        function exibirPainelBusca() {
-            document.getElementById('painel-auth').classList.add('hidden');
-            document.getElementById('painel-busca').classList.remove('hidden');
-            document.getElementById('nome-exibicao').innerText = usuarioAtual.nome;
-            document.getElementById('usuario-avatar').innerText = usuarioAtual.nome.charAt(0).toUpperCase();
-            document.getElementById('usuario-avatar').classList.remove('hidden');
+        function definirAtalho(destino, km) {
+            document.getElementById('input-destino').value = destino;
+            calcularCorridaReal(km);
         }
 
-        function obterGPS() {
-            document.getElementById('input-origem').value = "Residencial Neuci Pereira, Conselheiro Junqueira";
-        }
-
-        function realizarBusca() {
-            const origem = document.getElementById('input-origem').value || "Residencial Neuci Pereira";
+        function calcularCorridaReal(kmManual = null) {
+            const origem = document.getElementById('input-origem').value;
             const destino = document.getElementById('input-destino').value;
-            const bloco = document.getElementById('input-bloco').value;
 
             if (!destino) return;
 
-            let origemCompleta = origem;
-            if (bloco) origemCompleta += ` (${bloco})`;
+            const km = kmManual || (Math.floor(Math.random() * 15) / 10 + 2.5);
+            kmGlobal = km.toFixed(1);
 
-            document.getElementById('res-origem').innerText = "Origem: " + origemCompleta;
-            document.getElementById('res-destino').innerText = "Destino: " + destino;
+            document.getElementById('res-origem').innerText = origem;
+            document.getElementById('res-destino').innerText = destino;
+            document.getElementById('preco-exclusiva').innerText = "R$ 10,00";
+            document.getElementById('preco-compartilhada').innerText = "R$ 5,00";
+
             document.getElementById('card-resultado').classList.remove('hidden');
         }
 
         async function solicitarCorridaAPI() {
-            const origem = document.getElementById('input-origem').value || "Residencial Neuci Pereira";
+            const origem = document.getElementById('input-origem').value;
             const destino = document.getElementById('input-destino').value;
-            const bloco = document.getElementById('input-bloco').value;
-            const referencia = document.getElementById('input-referencia').value;
 
-            let origemComDetalhes = origem;
-            if (bloco) origemComDetalhes += ` - Bloco: ${bloco}`;
-            if (referencia) origemComDetalhes += ` - Ref: ${referencia}`;
-
-            // Troca os cards suaves na tela (SEM POP-UP)
             document.getElementById('painel-busca').classList.add('hidden');
             document.getElementById('card-resultado').classList.add('hidden');
             document.getElementById('card-status-corrida').classList.remove('hidden');
+            document.getElementById('status-modo-texto').innerText = `Modo selecionado: ${modalidadeEscolhida.toUpperCase()} (R$ ${valorFinalCorrida.toFixed(2)})`;
 
             try {
                 await fetch('/corridas/solicitar', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        passageiro: usuarioAtual.nome,
-                        origem: origemComDetalhes,
-                        destino: destino
+                        passageiro: "Flávio",
+                        origem: origem,
+                        destino: `${modalidadeEscolhida.toUpperCase()}: ${destino} (${kmGlobal}km - R$ ${valorFinalCorrida.toFixed(2)})`
                     })
                 });
 
-                // Monitoramento transparente
-                checagemInterval = setInterval(async () => {
+                setInterval(async () => {
                     const res = await fetch('/corridas/pendentes');
                     if (res.ok) {
                         const dados = await res.json();
                         if (dados && dados.status === 'aceita') {
-                            clearInterval(checagemInterval);
                             document.getElementById('status-procurando').classList.add('hidden');
                             document.getElementById('status-aceito').classList.remove('hidden');
                         }
