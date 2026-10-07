@@ -59,7 +59,7 @@ class SalvarLocalFavoritoRequest(BaseModel):
 
 import os
 
-# --- Rota Inicial (Carrega a Interface Web de Testes) ---
+# --- Rota Inicial (Carrega a Tela / MVP Interativo) ---
 @app.get("/", response_class=HTMLResponse)
 def home():
     caminho_html = os.path.join(os.path.dirname(__file__), "index.html")
