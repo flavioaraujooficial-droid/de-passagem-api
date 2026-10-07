@@ -24,12 +24,10 @@
             </span>
         </div>
 
-        <!-- LISTA DE CORRIDAS PENDENTES / ACEITAS -->
-        <div class="space-y-3">
-            <h2 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Chamadas na Região</h2>
-
+        <!-- ETAPA 1: RADAR DE CHAMADAS PENDENTES -->
+        <div id="secao-radar" class="space-y-3">
+            <h2 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Radar de Chamadas</h2>
             <div id="container-corridas" class="space-y-3">
-                <!-- Se não houver corrida, exibe aviso -->
                 <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 text-center space-y-2">
                     <i class="fa-solid fa-satellite-dish text-amber-400 text-xl animate-bounce"></i>
                     <p class="text-xs text-gray-300 font-semibold">Aguardando novas chamadas de passageiros...</p>
@@ -38,35 +36,55 @@
             </div>
         </div>
 
-        <!-- ÁREA DA CORRIDA ATIVA E VALIDAÇÃO POR PIN -->
-        <div id="painel-corrida-ativa" class="hidden bg-slate-900 p-4 rounded-2xl border-2 border-emerald-500 space-y-3 shadow-2xl">
+        <!-- ETAPA 2: CORRIDA ACEITA / AGUARDANDO EMBARQUE E PIN -->
+        <div id="painel-corrida-ativa" class="hidden bg-slate-900 p-4 rounded-2xl border-2 border-amber-500 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-                <span class="text-xs text-emerald-400 uppercase font-bold">🟢 Corrida Aceita</span>
-                <span id="ativo-modalidade" class="text-xs bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded font-bold">--</span>
+                <span class="text-xs font-bold text-amber-400 uppercase">🟡 1. Deslocamento até o Passageiro</span>
+                <span id="ativo-modalidade" class="text-xs bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded font-bold">Ativa</span>
             </div>
 
             <div class="space-y-2 text-xs">
                 <p class="text-gray-300">Passageiro(a): <span id="ativo-passageiro" class="font-bold text-white">--</span></p>
                 <p class="text-gray-300">Embarque: <span id="ativo-origem" class="font-bold text-white">--</span></p>
-                <p class="text-amber-400 font-bold">Destino: <span id="ativo-destino">--</span></p>
+                <p class="text-amber-400 font-bold">Destino Final: <span id="ativo-destino">--</span></p>
 
-                <!-- CAMPO DO CÓDIGO DE SEGURANÇA (PIN) -->
-                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2 mt-2">
-                    <label class="text-[11px] font-bold text-amber-400 flex items-center gap-1">
-                        <i class="fa-solid fa-lock"></i> Código de Segurança do Passageiro:
+                <!-- VALIDAÇÃO DO PIN E INÍCIO DA VIAGEM -->
+                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2 mt-3">
+                    <label class="text-[11px] font-bold text-emerald-400 flex items-center gap-1">
+                        <i class="fa-solid fa-key"></i> PIN de Segurança do Passageiro:
                     </label>
                     <div class="flex gap-2">
-                        <input id="input-pin-seguranca" type="text" maxlength="4" placeholder="Digite o PIN (ex: 4829)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-center text-sm font-bold text-white tracking-widest focus:outline-none focus:border-amber-400">
-                        <button onclick="validarPinEIniciar()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-4 py-2 rounded-lg text-xs transition shadow">
-                            Validar e Abrir GPS
+                        <input id="input-pin-seguranca" type="text" maxlength="4" placeholder="PIN (4 dígitos)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-center text-sm font-bold text-white tracking-widest focus:outline-none focus:border-emerald-400">
+                        <button onclick="validarPinEIniciarViagem()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-4 py-2 rounded-lg text-xs transition shadow whitespace-nowrap">
+                            Iniciar Corrida
                         </button>
                     </div>
-                    <p class="text-[10px] text-gray-400">Solicite o PIN de 4 dígitos ao passageiro no embarque para iniciar e liberar a navegação.</p>
+                    <p class="text-[10px] text-gray-400">Insira o PIN informado pelo passageiro para validar, abrir o GPS e iniciar o percurso.</p>
                 </div>
             </div>
 
-            <button onclick="cancelarCorridaMotorista()" class="w-full bg-slate-800 text-rose-400 font-bold py-2 rounded-xl text-xs mt-2">
-                Cancelar / Liberar Corrida
+            <button onclick="cancelarCorridaMotorista()" class="w-full bg-slate-800 text-rose-400 font-bold py-2 rounded-xl text-xs">
+                Cancelar / Recusar
+            </button>
+        </div>
+
+        <!-- ETAPA 3: EM VIAGEM (ROTA ATÉ O DESTINO) -->
+        <div id="painel-em-viagem" class="hidden bg-slate-900 p-4 rounded-2xl border-2 border-emerald-500 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                <span class="text-xs font-bold text-emerald-400 uppercase">🟢 2. Viagem em Andamento</span>
+                <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded font-bold">A caminho do destino</span>
+            </div>
+
+            <div class="space-y-2 text-xs">
+                <p class="text-gray-300">Destino atual: <span id="viagem-destino-txt" class="font-bold text-white">--</span></p>
+                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-center space-y-1">
+                    <p class="text-[11px] text-gray-400">Navegação GPS ativa para o destino.</p>
+                    <button onclick="reabrirGPS()" class="text-amber-400 font-bold underline text-xs">Reabrir no Google Maps</button>
+                </div>
+            </div>
+
+            <button onclick="finalizarCorrida()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black py-3 rounded-xl text-sm transition shadow-lg">
+                FINALIZAR CORRIDA E RECEBER
             </button>
         </div>
 
@@ -76,43 +94,45 @@
         let corridaAtualId = null;
         let destinoGlobalGPS = "";
 
-        // BUSCAR CORRIDAS PENDENTES DA API PERIODICAMENTE
+        // 1. BUSCAR CHAMADAS PENDENTES
         async function buscarCorridasPendentes() {
+            if (corridaAtualId) return; // Se já está em atendimento, não busca novas do radar
+
             try {
                 const res = await fetch('/corridas/pendentes');
                 if (res.ok) {
                     const dados = await res.json();
                     const container = document.getElementById('container-corridas');
 
-                    if (dados && dados.status === 'pendente' && !corridaAtualId) {
+                    if (dados && dados.status === 'pendente') {
                         container.innerHTML = `
                             <div class="bg-slate-900 p-4 rounded-2xl border-2 border-amber-500 space-y-3 shadow-xl">
                                 <div class="flex justify-between items-center border-b border-slate-800 pb-2">
                                     <span class="text-xs font-bold text-amber-400 uppercase">🚨 Nova Chamada em Alagoinhas</span>
-                                    <span class="text-xs text-gray-400">Agora mesmo</span>
+                                    <span class="text-xs text-gray-400">Agora</span>
                                 </div>
                                 <div class="space-y-1 text-xs">
                                     <p class="text-gray-300">Passageiro: <b class="text-white">${dados.passageiro || 'Flávio'}</b></p>
-                                    <p class="text-gray-300">Origem: <b class="text-white">${dados.origem}</b></p>
-                                    <p class="text-amber-400 font-bold">Destino/Detalhes: ${dados.destino}</p>
+                                    <p class="text-gray-300">Embarque: <b class="text-white">${dados.origem}</b></p>
+                                    <p class="text-amber-400 font-bold">Destino: ${dados.destino}</p>
                                 </div>
                                 <button onclick="aceitarCorrida('${dados.id || 1}', '${dados.passageiro || 'Flávio'}', '${dados.origem}', '${dados.destino}')" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-3 rounded-xl text-sm transition shadow-lg">
                                     ACEITAR CHAMADA
                                 </button>
                             </div>
                         `;
-                        destinoGlobalGPS = dados.destino;
                     }
                 }
             } catch (err) {}
         }
 
+        // 2. MOTORISTA ACEITA A CHAMADA
         async function aceitarCorrida(id, passageiro, origem, destino) {
             corridaAtualId = id;
             destinoGlobalGPS = destino;
 
-            // Esconde lista e mostra painel ativo
-            document.getElementById('container-corridas').innerHTML = `<p class="text-xs text-emerald-400 text-center font-semibold py-2">Corrida aceita! Aguardando embarque e validação do PIN.</p>`;
+            // Oculta radar e mostra painel de deslocamento até o passageiro
+            document.getElementById('secao-radar').classList.add('hidden');
             
             document.getElementById('ativo-passageiro').innerText = passageiro;
             document.getElementById('ativo-origem').innerText = origem;
@@ -128,30 +148,53 @@
             } catch (err) {}
         }
 
-        // VALIDA O CÓDIGO DE SEGURANÇA E DISPARA O GPS OFICIAL
-        function validarPinEIniciar() {
-            const pinDigitado = document.getElementById('input-pin-seguranca').value.trim();
+        // 3. VALIDA PIN, INICIA CORRIDA E ABRE GPS
+        function validarPinEIniciarViagem() {
+            const pin = document.getElementById('input-pin-seguranca').value.trim();
 
-            // Validação simples (pode aceitar qualquer 4 dígitos ou um padrão do app)
-            if (pinDigitado.length < 4) {
-                alert("Por favor, digite o PIN de 4 dígitos fornecido pelo passageiro.");
+            if (pin.length < 4) {
+                alert("Por favor, digite o PIN de 4 dígitos do passageiro.");
                 return;
             }
 
-            // Sucesso na validação: Dispara o GPS nativo do celular para o destino
-            alert("PIN confirmado com sucesso! Iniciando rota de navegação...");
-            
+            // Alterna para o painel "Em Viagem"
+            document.getElementById('painel-corrida-ativa').classList.add('hidden');
+            document.getElementById('viagem-destino-txt').innerText = destinoGlobalGPS;
+            document.getElementById('painel-em-viagem').classList.remove('hidden');
+
+            // Dispara o navegador GPS automaticamente para o destino
+            reabrirGPS();
+        }
+
+        function reabrirGPS() {
             const urlMaps = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destinoGlobalGPS + " Alagoinhas BA")}`;
             window.open(urlMaps, '_blank');
+        }
+
+        // 4. FINALIZAR CORRIDA E VOLTAR AO RADAR
+        function finalizarCorrida() {
+            alert("Corrida finalizada com sucesso! Retornando ao radar da praça.");
+            corridaAtualId = null;
+
+            document.getElementById('painel-em-viagem').classList.add('hidden');
+            document.getElementById('secao-radar').classList.remove('hidden');
+            document.getElementById('container-corridas').innerHTML = `
+                <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 text-center space-y-2">
+                    <i class="fa-solid fa-satellite-dish text-amber-400 text-xl animate-bounce"></i>
+                    <p class="text-xs text-gray-300 font-semibold">Aguardando novas chamadas de passageiros...</p>
+                    <p class="text-[10px] text-gray-500">O sistema atualiza automaticamente em tempo real.</p>
+                </div>
+            `;
         }
 
         function cancelarCorridaMotorista() {
             corridaAtualId = null;
             document.getElementById('painel-corrida-ativa').classList.add('hidden');
+            document.getElementById('secao-radar').classList.remove('hidden');
             buscarCorridasPendentes();
         }
 
-        // Executa a verificação a cada 2 segundos
+        // Executa a verificação periódica a cada 2 segundos
         setInterval(buscarCorridasPendentes, 2000);
     </script>
 </body>
