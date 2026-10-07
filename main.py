@@ -57,11 +57,14 @@ class SalvarLocalFavoritoRequest(BaseModel):
     latitude: float
     longitude: float
 
-# --- Rota Inicial (Painel Administrativo Web) ---
-@app.get("/", response_class=HTMLResponse)
+# --- Rota Inicial (Healthcheck da API) ---
+@app.get("/")
 def home():
-    with open("index.html", "r", encoding="utf-8") as f:
-        return f.read()
+    return {
+        "status": "online",
+        "app": "De Passagem API",
+        "versao": "1.0.0"
+    }
 
 # --- Rotas do Passageiro e Motorista ---
 @app.post("/corridas/solicitar")
