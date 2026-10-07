@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>De Passagem - Painel do Gestor (Alagoinhas)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans antialiased">
+
+  <!-- Menu Superior -->
+  <nav class="bg-blue-900 text-white p-4 shadow-lg">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <h1 class="text-2xl font-bold tracking-wide">De Passagem <span class="text-xs bg-yellow-500 text-black px-2 py-1 rounded font-semibold ml-2">Alagoinhas/BA</span></h1>
+      <span class="text-sm opacity-80">Painel de Controle do Gestor</span>
+    </div>
+  </nav>
+
+  <div class="max-w-7xl mx-auto p-6 space-y-8">
+
+    <!-- 1. BLOCO DE MÉTRICAS DA OPERAÇÃO -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div class="bg-white p-5 rounded-xl shadow-md border-l-4 border-blue-600">
+        <p class="text-sm font-medium text-gray-500">Corridas Totais</p>
+        <p class="text-3xl font-bold text-gray-800 mt-1" id="total-corridas">0</p>
+      </div>
+
+      <div class="bg-white p-5 rounded-xl shadow-md border-l-4 border-emerald-500">
+        <p class="text-sm font-medium text-gray-500">Faturamento Bruto</p>
+        <p class="text-3xl font-bold text-emerald-600 mt-1" id="faturamento-bruto">R$ 0,00</p>
+      </div>
+
+      <div class="bg-white p-5 rounded-xl shadow-md border-l-4 border-amber-500">
+        <p class="text-sm font-medium text-gray-500">Receita da Plataforma</p>
+        <p class="text-3xl font-bold text-amber-600 mt-1" id="receita-plataforma">R$ 0,00</p>
+      </div>
+
+      <div class="bg-white p-5 rounded-xl shadow-md border-l-4 border-indigo-600">
+        <p class="text-sm font-medium text-gray-500">Motoristas Online</p>
+        <p class="text-3xl font-bold text-indigo-600 mt-1" id="motoristas-online">0</p>
+      </div>
+    </div>
+
+    <!-- 2. GESTÃO DE TARIFAS DO SISTEMA -->
+    <div class="bg-white p-6 rounded-xl shadow-md">
+      <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Ajuste de Tarifas da Cidade (Alagoinhas)</h2>
+      <form id="form-tarifas" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Taxa Mínima App (R$)</label>
+          <input type="number" step="0.50" id="taxa_minima" value="2.00" class="w-full border rounded p-2 text-gray-800 font-bold">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Porcentagem Longa Dist. (%)</label>
+          <input type="number" step="1" id="porcentagem" value="12" class="w-full border rounded p-2 text-gray-800 font-bold">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Tarifa Base por KM (R$)</label>
+          <input type="number" step="0.10" id="tarifa_km" value="2.50" class="w-full border rounded p-2 text-gray-800 font-bold">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Taxa por Parada (R$)</label>
+          <input type="number" step="0.50" id="taxa_parada" value="3.50" class="w-full border rounded p-2 text-gray-800 font-bold">
+        </div>
+        <div class="md:col-span-4 flex justify-end mt-2">
+          <button type="button" onclick="salvarTarifas()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded shadow transition">
+            Atualizar Tarifas na Nuvem
+          </button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+
+  <!-- LÓGICA DE CONEXÃO COM A API NA VERCEL -->
+  <script>
+    const API_URL = "https://alagoinhas-mobilidade-api.vercel.app"; // Substitua pela sua URL final da Vercel
+
+    async function carregarDashboard() {
+      try {
+        const res = await fetch(`${API_URL}/admin/dashboard`);
+        const data = await res.json();
+
+        document.getElementById('total-corridas').innerText = data.total_corridas;
+        document.getElementById('faturamento-bruto').innerText = `R$ ${data.faturamento_bruto.toFixed(2)}`;
+        document.getElementById('receita-plataforma').innerText = `R$ ${data.receita_plataforma.toFixed(2)}`;
+        document.getElementById('motoristas-online').innerText = data.motoristas_online;
+      } catch (err) {
+        console.error("Erro ao carregar métricas:", err);
+      }
+    }
+
+    async function salvarTarifas() {
+      const payload = {
+        taxa_fixa_minima_app: parseFloat(document.getElementById('taxa_minima').value),
+        porcentagem_app_longa_distancia: parseFloat(document.getElementById('porcentagem').value),
+        tarifa_km_base: parseFloat(document.getElementById('tarifa_km').value),
+        taxa_adicional_parada: parseFloat(document.getElementById('taxa_parada').value)
+      };
+
+      try {
+        const res = await fetch(`${API_URL}/admin/tarifas/atualizar`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const resposta = await res.json();
+        alert(resposta.mensagem);
+      } catch (err) {
+        alert("Erro ao atualizar tarifas.");
+      }
+    }
+
+    // Carrega os dados ao abrir a página
+    carregarDashboard();
+  </script>
+</body>
+</html>
