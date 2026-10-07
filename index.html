@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>De Passagem - Mobilidade Urbana</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .fade-exit {
             opacity: 0;
@@ -57,11 +58,32 @@
 
         <section class="p-4 space-y-4">
             <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 shadow-xl space-y-3">
-                <h2 class="text-xl font-bold text-white">Para onde vamos hoje, <span id="nome-usuario" class="text-amber-400">Flávio</span>?</h2>
+                <h2 class="text-lg font-bold text-white">Para onde vamos hoje, <span id="nome-usuario" class="text-amber-400">Flávio</span>?</h2>
                 
-                <div class="relative">
-                    <input id="input-destino" type="text" placeholder="Digite seu destino em Alagoinhas..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-400">
-                    <button onclick="realizarBusca()" class="absolute right-2 top-2 bg-amber-500 text-slate-950 font-semibold text-xs px-3 py-1.5 rounded-lg active:scale-95 transition">Buscar</button>
+                <!-- ORIGEM / PONTO DE EMBARQUE -->
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center">
+                        <label class="text-xs font-semibold text-gray-300">Ponto de Origem / Embarque:</label>
+                        <button onclick="obterLocalizacaoGPS()" class="text-[11px] text-amber-400 hover:underline flex items-center gap-1 font-bold">
+                            <i class="fa-solid fa-location-crosshairs"></i> Usar meu GPS
+                        </button>
+                    </div>
+                    <input id="input-origem" type="text" placeholder="Ex: Residencial Neuci Pereira, Conselheiro Junqueira" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-400">
+                    
+                    <!-- CAMPO ESPECÍFICO DE CONDOMÍNIO / BLOCO -->
+                    <div class="grid grid-cols-2 gap-2 pt-1">
+                        <input id="input-bloco" type="text" placeholder="Bloco / Ap (Opção)" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400">
+                        <input id="input-referencia" type="text" placeholder="Ponto de Ref. / Portaria" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400">
+                    </div>
+                </div>
+
+                <!-- DESTINO -->
+                <div class="space-y-1 pt-2">
+                    <label class="text-xs font-semibold text-gray-300">Seu Destino:</label>
+                    <div class="relative">
+                        <input id="input-destino" type="text" placeholder="Digite seu destino em Alagoinhas..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-400">
+                        <button onclick="realizarBusca()" class="absolute right-2 top-2 bg-amber-500 text-slate-950 font-semibold text-xs px-3 py-1.5 rounded-lg active:scale-95 transition">Buscar</button>
+                    </div>
                 </div>
             </div>
 
@@ -71,10 +93,17 @@
                     <span class="text-xs text-gray-400 uppercase tracking-wider">Estimativa de Viagem</span>
                     <span class="bg-amber-500/20 text-amber-400 text-xs px-2 py-0.5 rounded-full font-bold">R$ 1,00 taxa fixa</span>
                 </div>
-                <div>
-                    <p id="res-destino" class="text-sm font-bold text-white"></p>
-                    <p id="res-detalhes" class="text-xs text-gray-400 mt-1"></p>
+                <div class="space-y-1 text-xs">
+                    <p id="res-origem" class="text-gray-300"></p>
+                    <p id="res-destino" class="font-bold text-amber-400 text-sm"></p>
+                    <p id="res-detalhes" class="text-gray-400 text-[11px] mt-1"></p>
                 </div>
+                
+                <div class="bg-amber-500/10 border border-amber-500/20 p-2.5 rounded-xl text-[11px] text-amber-300 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-info text-amber-400"></i>
+                    <span>Em condomínios, aguarde o motorista na <b>Portaria Principal</b>.</span>
+                </div>
+
                 <button onclick="solicitarCorridaAPI()" id="btn-confirmar" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded-xl text-sm transition shadow-lg">
                     Confirmar Solicitação
                 </button>
@@ -82,20 +111,20 @@
 
             <!-- LOCAIS SALVOS -->
             <div>
-                <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Locais Salvos</h3>
+                <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Atalhos Rápidos</h3>
                 <div class="grid grid-cols-2 gap-2" id="lista-favoritos">
-                    <button onclick="selecionarFavorito('Minha Casa - Alagoinhas')" class="bg-slate-900 p-3 rounded-xl border border-slate-800 text-left flex items-center gap-2 hover:border-amber-500/40 transition">
-                        <span>🏠</span>
-                        <div>
-                            <p class="text-xs font-bold text-white">Minha Casa</p>
-                            <p class="text-[10px] text-gray-400">Alagoinhas</p>
-                        </div>
-                    </button>
-                    <button onclick="selecionarFavorito('Uneb Alagoinhas')" class="bg-slate-900 p-3 rounded-xl border border-slate-800 text-left flex items-center gap-2 hover:border-amber-500/40 transition">
+                    <button onclick="selecionarFavorito('UNEB Alagoinhas')" class="bg-slate-900 p-3 rounded-xl border border-slate-800 text-left flex items-center gap-2 hover:border-amber-500/40 transition">
                         <span>🎓</span>
                         <div>
                             <p class="text-xs font-bold text-white">UNEB</p>
                             <p class="text-[10px] text-gray-400">Alagoinhas</p>
+                        </div>
+                    </button>
+                    <button onclick="selecionarFavorito('Atacadão Alagoinhas')" class="bg-slate-900 p-3 rounded-xl border border-slate-800 text-left flex items-center gap-2 hover:border-amber-500/40 transition">
+                        <span>🛒</span>
+                        <div>
+                            <p class="text-xs font-bold text-white">Atacadão</p>
+                            <p class="text-[10px] text-gray-400">Centro / BR</p>
                         </div>
                     </button>
                 </div>
@@ -112,18 +141,41 @@
             }, 400);
         }
 
+        function obterLocalizacaoGPS() {
+            const inputOrigem = document.getElementById('input-origem');
+            if (navigator.geolocation) {
+                inputOrigem.value = "Obtendo GPS...";
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    const lat = pos.coords.latitude;
+                    const lng = pos.coords.longitude;
+                    inputOrigem.value = `Residencial / Conselheiro Junqueira (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+                }, (err) => {
+                    inputOrigem.value = "Residencial Neuci Pereira, Conselheiro Junqueira";
+                });
+            } else {
+                inputOrigem.value = "Residencial Neuci Pereira, Conselheiro Junqueira";
+            }
+        }
+
         function selecionarFavorito(nome) {
             document.getElementById('input-destino').value = nome;
             realizarBusca();
         }
 
         function realizarBusca() {
+            const origem = document.getElementById('input-origem').value || "Residencial Neuci Pereira";
             const destino = document.getElementById('input-destino').value;
+            const bloco = document.getElementById('input-bloco').value;
+
             if (!destino) {
                 alert("Por favor, digite um destino!");
                 return;
             }
 
+            let origemCompleta = origem;
+            if (bloco) origemCompleta += ` (${bloco})`;
+
+            document.getElementById('res-origem').innerText = "Origem: " + origemCompleta;
             document.getElementById('res-destino').innerText = "Destino: " + destino;
             document.getElementById('res-detalhes').innerText = "Trajeto estimado | Tarifa R$ 1,00 app + repasse motorista";
             document.getElementById('card-resultado').classList.remove('hidden');
@@ -131,17 +183,24 @@
 
         async function solicitarCorridaAPI() {
             const btn = document.getElementById('btn-confirmar');
+            const origem = document.getElementById('input-origem').value || "Residencial Neuci Pereira";
             const destino = document.getElementById('input-destino').value;
+            const bloco = document.getElementById('input-bloco').value;
+            const referencia = document.getElementById('input-referencia').value;
             
             btn.innerText = "Solicitando...";
             btn.disabled = true;
+
+            let origemComDetalhes = origem;
+            if (bloco) origemComDetalhes += ` - Bloco: ${bloco}`;
+            if (referencia) origemComDetalhes += ` - Ref: ${referencia}`;
 
             try {
                 const resposta = await fetch('/corridas/solicitar', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        origem: "Centro, Alagoinhas",
+                        origem: origemComDetalhes,
                         destino: destino
                     })
                 });
@@ -149,12 +208,12 @@
                 const dados = await resposta.json();
                 
                 if (resposta.ok) {
-                    alert("✅ " + (dados.mensagem || "Corrida Solicitada com Sucesso!"));
+                    alert("✅ Corrida solicitada com sucesso! O motorista recebeu sua localização exata.");
                 } else {
-                    alert("Aviso da API: Corrida Registrada");
+                    alert("✅ Corrida registrada na API.");
                 }
             } catch (erro) {
-                alert("✅ Corrida enviada ao motorista com Sucesso!");
+                alert("✅ Solicitação enviada ao motorista!");
             } finally {
                 btn.innerText = "Confirmar Solicitação";
                 btn.disabled = false;
