@@ -57,14 +57,16 @@ class SalvarLocalFavoritoRequest(BaseModel):
     latitude: float
     longitude: float
 
-# --- Rota Inicial (Healthcheck da API) ---
-@app.get("/")
+import os
+
+# --- Rota Inicial (Carrega a Interface Web de Testes) ---
+@app.get("/", response_class=HTMLResponse)
 def home():
-    return {
-        "status": "online",
-        "app": "De Passagem API",
-        "versao": "1.0.0"
-    }
+    caminho_html = os.path.join(os.path.dirname(__file__), "index.html")
+    if os.path.exists(caminho_html):
+        with open(caminho_html, "r", encoding="utf-8") as f:
+            return f.read()
+    return "<h1>De Passagem API no Ar! (Arquivo index.html não encontrado)</h1>"
 
 # --- Rotas do Passageiro e Motorista ---
 @app.post("/corridas/solicitar")
