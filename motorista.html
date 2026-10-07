@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>De Passagem - Painel do Motorista</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-slate-950 text-white font-sans antialiased min-h-screen p-4 max-w-md mx-auto">
     <header class="p-4 bg-slate-900 rounded-2xl border border-slate-800 flex justify-between items-center mb-4">
@@ -19,27 +20,32 @@
 
     <main class="space-y-4">
         <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 space-y-2">
-            <p class="text-xs text-gray-400 uppercase tracking-wider">Radar de Chamadas</p>
-            <p id="status-radar" class="text-sm font-semibold text-amber-400">Aguardando solicitações de passageiros...</p>
+            <p class="text-xs text-gray-400 uppercase tracking-wider font-semibold">Radar de Chamadas</p>
+            <p id="status-radar" class="text-sm font-semibold text-amber-400">Aguardando solicitações em Alagoinhas...</p>
         </div>
 
-        <div id="card-corrida" class="hidden bg-slate-900 p-5 rounded-2xl border-2 border-amber-500 space-y-4 shadow-2xl animate-bounce">
+        <!-- CARD DA CORRIDA REAL -->
+        <div id="card-corrida" class="hidden bg-slate-900 p-5 rounded-2xl border-2 border-amber-500 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-                <span class="text-xs font-bold text-amber-400 uppercase">NOVA CORRIDA ENCONTRADA</span>
+                <span class="text-xs font-bold text-amber-400 uppercase flex items-center gap-1">
+                    <i class="fa-solid fa-bell animate-bounce"></i> NOVA CORRIDA ENCONTRADA
+                </span>
                 <span class="text-xs bg-amber-500/20 text-amber-400 px-2 py-1 rounded-md font-bold">R$ 1,00 taxa app</span>
             </div>
             <div>
-                <p class="text-xs text-gray-400">Origem: <span class="text-white font-bold">Centro, Alagoinhas</span></p>
-                <p class="text-xs text-gray-400 mt-1">Destino: <span id="corrida-destino" class="text-white font-bold">Atacadão</span></p>
+                <p class="text-xs text-gray-400">Origem: <span id="corrida-origem" class="text-white font-bold">Centro, Alagoinhas</span></p>
+                <p class="text-xs text-gray-400 mt-1">Destino: <span id="corrida-destino" class="text-amber-400 font-extrabold text-sm">--</span></p>
             </div>
-            <button onclick="aceitarCorrida()" id="btn-aceitar" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-3 rounded-xl text-sm transition">
-                ACEITAR CORRIDA NOW
+            <button onclick="aceitarCorrida()" id="btn-aceitar" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-3 rounded-xl text-sm transition shadow-lg">
+                ACEITAR CORRIDA
             </button>
         </div>
     </main>
 
     <script>
         let emServico = true;
+        let corridaAtual = null;
+
         function alternarStatus() {
             emServico = !emServico;
             const btn = document.getElementById('btn-status');
@@ -47,26 +53,41 @@
             if (emServico) {
                 btn.className = "bg-emerald-500 text-slate-950 font-bold text-xs px-3 py-2 rounded-xl";
                 btn.innerText = "🟢 ONLINE";
-                radar.innerText = "Aguardando solicitações de passageiros...";
+                radar.innerText = "Aguardando solicitações em Alagoinhas...";
             } else {
                 btn.className = "bg-rose-500 text-white font-bold text-xs px-3 py-2 rounded-xl";
                 btn.innerText = "🔴 OFFLINE";
                 radar.innerText = "Você está offline. Fique online para receber corridas.";
+                document.getElementById('card-corrida').classList.add('hidden');
             }
         }
 
-        // Simulação de corrida recebida via API
-        setTimeout(() => {
-            if (emServico) {
-                document.getElementById('card-corrida').classList.remove('hidden');
-                document.getElementById('status-radar').innerText = "🔔 Solicitação recebida!";
+        // Consultar corridas novas na API a cada 3 segundos
+        setInterval(async () => {
+            if (!emServico || corridaAtual) return;
+
+            try {
+                const res = await fetch('/corridas/pendentes');
+                if (res.ok) {
+                    const dados = await res.json();
+                    if (dados && dados.destino) {
+                        corridaAtual = dados;
+                        document.getElementById('corrida-origem').innerText = dados.origem || "Alagoinhas";
+                        document.getElementById('corrida-destino').innerText = dados.destino;
+                        document.getElementById('card-corrida').classList.remove('hidden');
+                        document.getElementById('status-radar').innerText = "🔔 Chamada recebida!";
+                    }
+                }
+            } catch (err) {
+                // Silencioso se não houver corrida
             }
         }, 3000);
 
         function aceitarCorrida() {
-            alert("✅ Corrida Aceita! Navegação iniciada para o ponto de embarque.");
+            alert("✅ Corrida para " + document.getElementById('corrida-destino').innerText + " aceita com sucesso!");
             document.getElementById('card-corrida').classList.add('hidden');
-            document.getElementById('status-radar').innerText = "🚗 Corrida em andamento...";
+            document.getElementById('status-radar').innerText = "🚗 Em rota de atendimento...";
+            corridaAtual = null;
         }
     </script>
 </body>
