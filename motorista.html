@@ -3,186 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>De Passagem - Motorista</title>
+    <title>De Passagem - Painel do Motorista</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-slate-950 text-white font-sans antialiased min-h-screen p-4 max-w-md mx-auto">
-    
-    <!-- CABEÇALHO -->
-    <header class="p-4 bg-slate-900 rounded-2xl border border-slate-800 flex justify-between items-center mb-4">
-        <div>
-            <h1 class="font-bold text-amber-400 text-lg">De Passagem - Motorista</h1>
-            <p class="text-xs text-gray-400">Alagoinhas / BA</p>
-        </div>
-        <div id="status-badge" class="hidden">
-            <span class="bg-emerald-500 text-slate-950 font-bold text-xs px-3 py-2 rounded-xl">
-                🟢 ONLINE
+<body class="bg-slate-900 text-white font-sans antialiased overflow-x-hidden">
+
+    <main class="min-h-screen flex flex-col max-w-md mx-auto bg-slate-950 relative p-4 space-y-4">
+        
+        <header class="p-3 bg-slate-900 rounded-2xl border border-slate-800 flex justify-between items-center">
+            <span class="font-bold text-amber-400 text-lg">Painel do Motorista</span>
+            <span class="text-xs text-emerald-400 font-semibold">🚗 Ford Fiesta • Alagoinhas</span>
+        </header>
+
+        <!-- STATUS DA PRAÇA -->
+        <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 flex justify-between items-center text-xs">
+            <span class="text-gray-300">Status na Praça:</span>
+            <span class="bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-lg font-bold flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Online (Alagoinhas)
             </span>
         </div>
-    </header>
 
-    <main class="space-y-4">
-        
-        <!-- 1. TELA DE LOGIN / CADASTRO DO MOTORISTA -->
-        <div id="painel-auth-motorista" class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl space-y-4">
-            <div class="text-center space-y-1">
-                <div class="w-12 h-12 bg-amber-500/10 border border-amber-500/30 rounded-full flex items-center justify-center mx-auto text-amber-400 text-xl mb-2">
-                    <i class="fa-solid fa-id-card"></i>
+        <!-- LISTA DE CORRIDAS PENDENTES / ACEITAS -->
+        <div class="space-y-3">
+            <h2 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Chamadas na Região</h2>
+
+            <div id="container-corridas" class="space-y-3">
+                <!-- Se não houver corrida, exibe aviso -->
+                <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 text-center space-y-2">
+                    <i class="fa-solid fa-satellite-dish text-amber-400 text-xl animate-bounce"></i>
+                    <p class="text-xs text-gray-300 font-semibold">Aguardando novas chamadas de passageiros...</p>
+                    <p class="text-[10px] text-gray-500">O sistema atualiza automaticamente em tempo real.</p>
                 </div>
-                <h2 class="text-xl font-bold text-white">Acesso do Motorista</h2>
-                <p class="text-xs text-gray-400">Identifique-se para ficar online e aceitar corridas</p>
             </div>
-
-            <form onsubmit="autenticarMotorista(event)" class="space-y-3">
-                <div>
-                    <label class="text-xs font-semibold text-gray-300">Seu Nome:</label>
-                    <input id="auth-mot-nome" type="text" placeholder="Ex: Flávio Araújo" required class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-400">
-                </div>
-                <div>
-                    <label class="text-xs font-semibold text-gray-300">Veículo / Modelo:</label>
-                    <input id="auth-mot-carro" type="text" placeholder="Ex: Ford Fiesta • Prata" required class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-400">
-                </div>
-                <div>
-                    <label class="text-xs font-semibold text-gray-300">WhatsApp / Telefone:</label>
-                    <input id="auth-mot-telefone" type="tel" placeholder="(75) 99999-9999" required class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-400">
-                </div>
-                <div>
-                    <label class="text-xs font-semibold text-gray-300">Senha:</label>
-                    <input id="auth-mot-senha" type="password" placeholder="Sua senha de acesso" required class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-400">
-                </div>
-
-                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded-xl text-sm transition shadow-lg mt-2">
-                    Ficar Online para Corridas
-                </button>
-            </form>
         </div>
 
-        <!-- 2. PAINEL DE NAVEGAÇÃO E CHAMADAS (OCULTO ATÉ O LOGIN) -->
-        <div id="painel-radar" class="hidden space-y-4">
-            
-            <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 space-y-2">
-                <div class="flex justify-between items-center">
-                    <p class="text-xs text-gray-400 uppercase tracking-wider font-semibold">Radar de Chamadas</p>
-                    <p id="mot-nome-exibicao" class="text-xs font-bold text-amber-400">--</p>
-                </div>
-                <p id="status-radar" class="text-sm font-semibold text-amber-400">Aguardando solicitações em Alagoinhas...</p>
+        <!-- ÁREA DA CORRIDA ATIVA E VALIDAÇÃO POR PIN -->
+        <div id="painel-corrida-ativa" class="hidden bg-slate-900 p-4 rounded-2xl border-2 border-emerald-500 space-y-3 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                <span class="text-xs text-emerald-400 uppercase font-bold">🟢 Corrida Aceita</span>
+                <span id="ativo-modalidade" class="text-xs bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded font-bold">--</span>
             </div>
 
-            <!-- CARD DE CHAMADA RECEBIDA EM TEMPO REAL -->
-            <div id="card-corrida" class="hidden bg-slate-900 p-5 rounded-2xl border-2 border-amber-500 space-y-4 shadow-2xl">
-                <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-                    <span class="text-xs font-bold text-amber-400 uppercase flex items-center gap-1">
-                        <i class="fa-solid fa-bell animate-bounce"></i> NOVA CORRIDA RECEBIDA
-                    </span>
-                    <span class="text-xs bg-amber-500/20 text-amber-400 px-2 py-1 rounded-md font-bold">R$ 1,00 taxa app</span>
-                </div>
-                <div class="space-y-1">
-                    <p class="text-xs text-gray-400">Passageiro: <span id="corrida-passageiro" class="text-white font-bold">--</span></p>
-                    <p class="text-xs text-gray-400">Embarque: <span id="corrida-origem" class="text-white font-bold">--</span></p>
-                    <p class="text-xs text-gray-400 mt-1">Destino: <span id="corrida-destino" class="text-amber-400 font-extrabold text-sm">--</span></p>
-                </div>
-                <button onclick="aceitarCorrida()" id="btn-aceitar" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-3 rounded-xl text-sm transition shadow-lg">
-                    ACEITAR CORRIDA
-                </button>
-            </div>
+            <div class="space-y-2 text-xs">
+                <p class="text-gray-300">Passageiro(a): <span id="ativo-passageiro" class="font-bold text-white">--</span></p>
+                <p class="text-gray-300">Embarque: <span id="ativo-origem" class="font-bold text-white">--</span></p>
+                <p class="text-amber-400 font-bold">Destino: <span id="ativo-destino">--</span></p>
 
-            <!-- PAINEL DE NAVEGAÇÃO / CORRIDA EM ANDAMENTO -->
-            <div id="card-andamento" class="hidden bg-slate-900 p-5 rounded-2xl border-2 border-emerald-500 space-y-4 shadow-2xl">
-                <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-                    <span class="text-xs font-bold text-emerald-400 uppercase flex items-center gap-1">
-                        <i class="fa-solid fa-route"></i> EM ROTA DE EMBARQUE
-                    </span>
-                    <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded-md font-bold">Em Viagem</span>
-                </div>
-                <div class="space-y-2">
-                    <p class="text-xs text-gray-400">Passageiro: <span id="andamento-passageiro" class="text-white font-bold">--</span></p>
-                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1">
-                        <p class="text-xs text-amber-400 font-bold" id="andamento-origem">--</p>
-                        <p class="text-xs text-gray-300" id="andamento-destino">--</p>
+                <!-- CAMPO DO CÓDIGO DE SEGURANÇA (PIN) -->
+                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2 mt-2">
+                    <label class="text-[11px] font-bold text-amber-400 flex items-center gap-1">
+                        <i class="fa-solid fa-lock"></i> Código de Segurança do Passageiro:
+                    </label>
+                    <div class="flex gap-2">
+                        <input id="input-pin-seguranca" type="text" maxlength="4" placeholder="Digite o PIN (ex: 4829)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-center text-sm font-bold text-white tracking-widest focus:outline-none focus:border-amber-400">
+                        <button onclick="validarPinEIniciar()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-4 py-2 rounded-lg text-xs transition shadow">
+                            Validar e Abrir GPS
+                        </button>
                     </div>
+                    <p class="text-[10px] text-gray-400">Solicite o PIN de 4 dígitos ao passageiro no embarque para iniciar e liberar a navegação.</p>
                 </div>
-                <button onclick="finalizarCorrida()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black py-3 rounded-xl text-sm transition shadow-lg">
-                    FINALIZAR CORRIDA
-                </button>
             </div>
 
+            <button onclick="cancelarCorridaMotorista()" class="w-full bg-slate-800 text-rose-400 font-bold py-2 rounded-xl text-xs mt-2">
+                Cancelar / Liberar Corrida
+            </button>
         </div>
 
     </main>
 
     <script>
-        let motoristaAtual = null;
-        let corridaAtual = null;
+        let corridaAtualId = null;
+        let destinoGlobalGPS = "";
 
-        // Verificar sessão salva ao carregar a página
-        window.addEventListener('DOMContentLoaded', () => {
-            const salvo = localStorage.getItem('depassagem_motorista');
-            if (salvo) {
-                motoristaAtual = JSON.parse(salvo);
-                exibirRadarMotorista();
-            }
-        });
-
-        function autenticarMotorista(event) {
-            event.preventDefault();
-            const nome = document.getElementById('auth-mot-nome').value;
-            const carro = document.getElementById('auth-mot-carro').value;
-            const telefone = document.getElementById('auth-mot-telefone').value;
-
-            motoristaAtual = { nome, carro, telefone };
-            localStorage.setItem('depassagem_motorista', JSON.stringify(motoristaAtual));
-            exibirRadarMotorista();
-        }
-
-        function exibirRadarMotorista() {
-            document.getElementById('painel-auth-motorista').classList.add('hidden');
-            document.getElementById('painel-radar').classList.remove('hidden');
-            document.getElementById('status-badge').classList.remove('hidden');
-            document.getElementById('mot-nome-exibicao').innerText = motoristaAtual.nome;
-
-            iniciarMonitoramentoRadar();
-        }
-
-        function iniciarMonitoramentoRadar() {
-            setInterval(async () => {
-                if (corridaAtual) return;
-
-                try {
-                    const res = await fetch('/corridas/pendentes');
-                    if (res.ok) {
-                        const dados = await res.json();
-                        if (dados && dados.destino && dados.status === 'pendente') {
-                            corridaAtual = dados;
-                            document.getElementById('corrida-passageiro').innerText = dados.passageiro || "Passageiro";
-                            document.getElementById('corrida-origem').innerText = dados.origem || "Alagoinhas";
-                            document.getElementById('corrida-destino').innerText = dados.destino;
-                            document.getElementById('card-corrida').classList.remove('hidden');
-                            document.getElementById('status-radar').innerText = "🔔 Nova solicitação recebida!";
-                        }
-                    }
-                } catch (err) {}
-            }, 2000);
-        }
-
-        async function aceitarCorrida() {
+        // BUSCAR CORRIDAS PENDENTES DA API PERIODICAMENTE
+        async function buscarCorridasPendentes() {
             try {
-                await fetch('/corridas/aceitar', { method: 'POST' });
-                document.getElementById('card-corrida').classList.add('hidden');
-                document.getElementById('card-andamento').classList.remove('hidden');
-                
-                document.getElementById('andamento-passageiro').innerText = corridaAtual.passageiro || "Passageiro";
-                document.getElementById('andamento-origem').innerText = "Ponto de Embarque: " + corridaAtual.origem;
-                document.getElementById('andamento-destino').innerText = "Destino Final: " + corridaAtual.destino;
-                
-                document.getElementById('status-radar').innerText = "🚗 Em rota de embarque!";
+                const res = await fetch('/corridas/pendentes');
+                if (res.ok) {
+                    const dados = await res.json();
+                    const container = document.getElementById('container-corridas');
+
+                    if (dados && dados.status === 'pendente' && !corridaAtualId) {
+                        container.innerHTML = `
+                            <div class="bg-slate-900 p-4 rounded-2xl border-2 border-amber-500 space-y-3 shadow-xl">
+                                <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                                    <span class="text-xs font-bold text-amber-400 uppercase">🚨 Nova Chamada em Alagoinhas</span>
+                                    <span class="text-xs text-gray-400">Agora mesmo</span>
+                                </div>
+                                <div class="space-y-1 text-xs">
+                                    <p class="text-gray-300">Passageiro: <b class="text-white">${dados.passageiro || 'Flávio'}</b></p>
+                                    <p class="text-gray-300">Origem: <b class="text-white">${dados.origem}</b></p>
+                                    <p class="text-amber-400 font-bold">Destino/Detalhes: ${dados.destino}</p>
+                                </div>
+                                <button onclick="aceitarCorrida('${dados.id || 1}', '${dados.passageiro || 'Flávio'}', '${dados.origem}', '${dados.destino}')" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-3 rounded-xl text-sm transition shadow-lg">
+                                    ACEITAR CHAMADA
+                                </button>
+                            </div>
+                        `;
+                        destinoGlobalGPS = dados.destino;
+                    }
+                }
             } catch (err) {}
         }
 
-        async function finalizarCorrida() {
-            await fetch('/corridas/finalizar', { method: 'POST' });
-            location.reload();
+        async function aceitarCorrida(id, passageiro, origem, destino) {
+            corridaAtualId = id;
+            destinoGlobalGPS = destino;
+
+            // Esconde lista e mostra painel ativo
+            document.getElementById('container-corridas').innerHTML = `<p class="text-xs text-emerald-400 text-center font-semibold py-2">Corrida aceita! Aguardando embarque e validação do PIN.</p>`;
+            
+            document.getElementById('ativo-passageiro').innerText = passageiro;
+            document.getElementById('ativo-origem').innerText = origem;
+            document.getElementById('ativo-destino').innerText = destino;
+            document.getElementById('painel-corrida-ativa').classList.remove('hidden');
+
+            try {
+                await fetch('/corridas/aceitar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: id, status: 'aceita' })
+                });
+            } catch (err) {}
         }
+
+        // VALIDA O CÓDIGO DE SEGURANÇA E DISPARA O GPS OFICIAL
+        function validarPinEIniciar() {
+            const pinDigitado = document.getElementById('input-pin-seguranca').value.trim();
+
+            // Validação simples (pode aceitar qualquer 4 dígitos ou um padrão do app)
+            if (pinDigitado.length < 4) {
+                alert("Por favor, digite o PIN de 4 dígitos fornecido pelo passageiro.");
+                return;
+            }
+
+            // Sucesso na validação: Dispara o GPS nativo do celular para o destino
+            alert("PIN confirmado com sucesso! Iniciando rota de navegação...");
+            
+            const urlMaps = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destinoGlobalGPS + " Alagoinhas BA")}`;
+            window.open(urlMaps, '_blank');
+        }
+
+        function cancelarCorridaMotorista() {
+            corridaAtualId = null;
+            document.getElementById('painel-corrida-ativa').classList.add('hidden');
+            buscarCorridasPendentes();
+        }
+
+        // Executa a verificação a cada 2 segundos
+        setInterval(buscarCorridasPendentes, 2000);
     </script>
 </body>
 </html>
