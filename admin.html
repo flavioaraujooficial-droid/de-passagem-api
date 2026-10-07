@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>De Passagem - Login do Administrador</title>
+    <title>De Passagem - Central de Controle ADM</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-slate-950 text-white font-sans antialiased min-h-screen flex items-center justify-center p-4">
 
-    <!-- TELA 1: MODAL DE LOGIN (BLOQUEIO) -->
+    <!-- MODAL DE LOGIN DO ADM -->
     <div id="login-screen" class="w-full max-w-sm bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-2xl space-y-6 text-center">
         <div class="space-y-2">
             <div class="w-16 h-16 bg-amber-500/10 border border-amber-500/30 rounded-full flex items-center justify-center mx-auto text-amber-400 text-2xl">
@@ -33,16 +33,16 @@
         </form>
     </div>
 
-    <!-- TELA 2: PAINEL ADM COMPLETO (OCULTO ATÉ O LOGIN) -->
-    <div id="admin-dashboard" class="hidden w-full max-w-5xl mx-auto py-4">
+    <!-- PAINEL ADM COMPLETO -->
+    <div id="admin-dashboard" class="hidden w-full max-w-5xl mx-auto py-4 space-y-6">
         
-        <!-- CABEÇALHO COM BOTÃO DE SAIR -->
-        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 border-b border-slate-800 pb-4">
+        <!-- CABEÇALHO -->
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-800 pb-4">
             <div>
                 <h1 class="text-2xl md:text-3xl font-black text-amber-400 tracking-wide flex items-center gap-2">
-                    <i class="fa-solid fa-sliders"></i> Painel de Controle Operacional
+                    <i class="fa-solid fa-sliders"></i> Central Operacional De Passagem
                 </h1>
-                <p class="text-xs md:text-sm text-gray-400 mt-1">Gestão de Modais, Tarifas e Rotas - Operação Alagoinhas/BA</p>
+                <p class="text-xs md:text-sm text-gray-400 mt-1">Gestão de Segurança, Cadastros e Modais - Alagoinhas/BA</p>
             </div>
             <div class="flex items-center gap-3">
                 <span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-xs px-3 py-1.5 rounded-full font-bold flex items-center gap-2">
@@ -54,146 +54,100 @@
             </div>
         </header>
 
-        <!-- METRICAS DE OPERAÇÃO -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800">
-                <p class="text-xs text-gray-400 uppercase tracking-wider font-semibold">Faturamento App (R$ 1,00)</p>
-                <p class="text-2xl font-black text-emerald-400 mt-1">R$ 142,00</p>
+        <!-- SEÇÃO: APROVAÇÃO E SEGURANÇA DE CADASTROS -->
+        <section class="bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h2 class="text-sm font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-user-check"></i> Checagem de Segurança e Validação de Cadastros
+                </h2>
+                <span class="bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[11px] px-2.5 py-1 rounded-lg font-semibold">
+                    1 Pendente de Validação
+                </span>
             </div>
-            <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800">
-                <p class="text-xs text-gray-400 uppercase tracking-wider font-semibold">Motoristas Ativos</p>
-                <p class="text-2xl font-black text-amber-400 mt-1">18 veíc.</p>
-            </div>
-            <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800">
-                <p class="text-xs text-gray-400 uppercase tracking-wider font-semibold">Modais Rodando</p>
-                <p class="text-2xl font-black text-sky-400 mt-1">Carro / Van</p>
-            </div>
-            <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800">
-                <p class="text-xs text-gray-400 uppercase tracking-wider font-semibold">Corridas Hoje</p>
-                <p class="text-2xl font-black text-indigo-400 mt-1">142</p>
-            </div>
-        </div>
 
-        <!-- SEÇÕES DE CONFIGURAÇÃO DO SISTEMA -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            
-            <!-- 1. GESTÃO DE MODAIS E VEÍCULOS -->
+            <div class="space-y-3">
+                <!-- EXEMPLO DE MOTORISTA PENDENTE -->
+                <div class="p-4 bg-slate-950 rounded-xl border border-slate-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+                    <div class="space-y-1 text-xs">
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-white text-sm">Flávio Santos Araújo</span>
+                            <span class="bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded text-[10px] font-bold">MOTORISTA</span>
+                        </div>
+                        <p class="text-gray-400">Veículo: <span class="text-gray-200">Ford Fiesta • Prata</span> | WhatsApp: <span class="text-gray-200">(75) 99999-9999</span></p>
+                        <p class="text-gray-500 text-[10px]">Verificação: CNH com EAR ok • Antecedentes Criminais Pendentes</p>
+                    </div>
+
+                    <div class="flex items-center gap-2 w-full md:w-auto">
+                        <button onclick="alterarStatusCadastro('Aprovado')" class="flex-1 md:flex-initial bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/40 text-xs font-bold px-3 py-2 rounded-xl transition">
+                            <i class="fa-solid fa-check"></i> Aprovar
+                        </button>
+                        <button onclick="alterarStatusCadastro('Bloqueado')" class="flex-1 md:flex-initial bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 border border-rose-500/40 text-xs font-bold px-3 py-2 rounded-xl transition">
+                            <i class="fa-solid fa-ban"></i> Bloquear
+                        </button>
+                    </div>
+                </div>
+
+                <!-- EXEMPLO DE PASSAGEIRO APROVADO -->
+                <div class="p-4 bg-slate-950 rounded-xl border border-slate-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+                    <div class="space-y-1 text-xs">
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-white text-sm">Passageiro Exemplo</span>
+                            <span class="bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded text-[10px] font-bold">PASSAGEIRO</span>
+                        </div>
+                        <p class="text-gray-400">WhatsApp: <span class="text-gray-200">(75) 98888-8888</span></p>
+                        <p class="text-gray-500 text-[10px]">Verificação: WhatsApp Validado (OTP) • Status: Ativo</p>
+                    </div>
+
+                    <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-bold px-3 py-1.5 rounded-xl">
+                        Aprovado & Ativo
+                    </span>
+                </div>
+            </div>
+        </section>
+
+        <!-- SEÇÃO: GESTÃO DE MODAIS E TARIFAS -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-4">
                 <h2 class="text-sm font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
                     <i class="fa-solid fa-car-side"></i> Modais de Transporte Liberados
                 </h2>
-                <p class="text-xs text-gray-400">Configure quais tipos de veículos podem aceitar chamadas em Alagoinhas:</p>
-                
-                <div class="space-y-3">
+                <div class="space-y-3 text-xs">
                     <label class="flex items-center justify-between p-3 bg-slate-950 rounded-xl border border-slate-800 cursor-pointer">
-                        <div class="flex items-center gap-3">
-                            <i class="fa-solid fa-car text-amber-400"></i>
-                            <div>
-                                <p class="text-xs font-bold">Carro Passeio / Leve</p>
-                                <p class="text-[10px] text-gray-400">Até 4 passageiros (Atendimento padrão)</p>
-                            </div>
+                        <div>
+                            <p class="font-bold text-white">Carro Passeio / Leve</p>
+                            <p class="text-[10px] text-gray-400">Até 4 passageiros</p>
                         </div>
                         <input type="checkbox" checked class="w-4 h-4 accent-amber-500">
                     </label>
 
                     <label class="flex items-center justify-between p-3 bg-slate-950 rounded-xl border border-slate-800 cursor-pointer">
-                        <div class="flex items-center gap-3">
-                            <i class="fa-solid fa-van-shuttle text-amber-400"></i>
-                            <div>
-                                <p class="text-xs font-bold">Van / Micro-ônibus</p>
-                                <p class="text-[10px] text-gray-400">Horários de pico e maior capacidade</p>
-                            </div>
+                        <div>
+                            <p class="font-bold text-white">Van / Micro-ônibus</p>
+                            <p class="text-[10px] text-gray-400">Horários de pico</p>
                         </div>
                         <input type="checkbox" checked class="w-4 h-4 accent-amber-500">
-                    </label>
-
-                    <label class="flex items-center justify-between p-3 bg-slate-950 rounded-xl border border-slate-800 cursor-pointer">
-                        <div class="flex items-center gap-3">
-                            <i class="fa-solid fa-bus text-gray-500"></i>
-                            <div>
-                                <p class="text-xs font-bold text-gray-400">Ônibus Coletivo Pesado</p>
-                                <p class="text-[10px] text-gray-500">Desativado fora de pico</p>
-                            </div>
-                        </div>
-                        <input type="checkbox" class="w-4 h-4 accent-amber-500">
                     </label>
                 </div>
             </div>
 
-            <!-- 2. REGRAS DE VIAGEM E TARIFA -->
             <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-4">
                 <h2 class="text-sm font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
-                    <i class="fa-solid fa-hand-holding-dollar"></i> Ajuste de Valores e Regras
+                    <i class="fa-solid fa-hand-holding-dollar"></i> Configuração de Valores
                 </h2>
-                <p class="text-xs text-gray-400">Ajuste os valores operacionais e os tipos de viagem:</p>
-
                 <div class="space-y-3">
                     <div>
-                        <label class="text-xs font-semibold text-gray-300">Taxa Social Fixa do App (Plataforma):</label>
+                        <label class="text-xs font-semibold text-gray-300">Taxa Social Fixa do App:</label>
                         <input type="text" value="R$ 1,00" class="w-full mt-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-amber-400 font-bold focus:outline-none">
                     </div>
-
-                    <div>
-                        <label class="text-xs font-semibold text-gray-300">Valor Base Km (Repasse ao Motorista):</label>
-                        <input type="text" value="R$ 2,50 / km" class="w-full mt-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-bold focus:outline-none">
-                    </div>
-
-                    <div class="pt-2">
-                        <p class="text-xs font-semibold text-gray-300 mb-2">Modalidades Permitidas:</p>
-                        <div class="grid grid-cols-2 gap-2">
-                            <button class="bg-amber-500 text-slate-950 font-bold text-xs py-2 rounded-xl">👥 Compartilhada</button>
-                            <button class="bg-slate-800 text-gray-300 font-bold text-xs py-2 rounded-xl hover:bg-slate-700">🔒 Exclusiva</button>
-                        </div>
-                    </div>
                 </div>
             </div>
-
         </div>
-
-        <!-- 3. MONITORAMENTO DE ROTAS ATIVAS EM ALAGOINHAS -->
-        <section class="bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-4">
-            <div class="flex justify-between items-center">
-                <h2 class="text-sm font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
-                    <i class="fa-solid fa-route"></i> Rotas de Alagoinhas em Atendimento
-                </h2>
-                <button onclick="alert('Configurações Salvas com Sucesso!')" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs px-4 py-2 rounded-xl transition shadow-lg">
-                    Salvar Alterações
-                </button>
-            </div>
-
-            <div class="space-y-3">
-                <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs">
-                    <div>
-                        <p class="font-bold text-white">Rota 01: Centro ➔ Rua do Catu / Barreiro</p>
-                        <p class="text-gray-400 text-[10px]">Demanda: Alta | Modalidade: Compartilhada (Carros + Vans)</p>
-                    </div>
-                    <span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold px-2.5 py-1 rounded-md">Ativa</span>
-                </div>
-
-                <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs">
-                    <div>
-                        <p class="font-bold text-white">Rota 02: Praça Graciliano de Freitas ➔ Atacadão</p>
-                        <p class="text-gray-400 text-[10px]">Demanda: Média | Modalidade: Compartilhada / Exclusiva</p>
-                    </div>
-                    <span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold px-2.5 py-1 rounded-md">Ativa</span>
-                </div>
-
-                <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs">
-                    <div>
-                        <p class="font-bold text-white">Rota 03: Silva Jardim ➔ Santa Isabel</p>
-                        <p class="text-gray-400 text-[10px]">Demanda: Regular | Modalidade: Compartilhada</p>
-                    </div>
-                    <span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold px-2.5 py-1 rounded-md">Ativa</span>
-                </div>
-            </div>
-        </section>
 
     </div>
 
     <script>
         const SENHA_CORRETA = "admin123";
 
-        // Verifica se já fez login antes
         if (sessionStorage.getItem('adm_logado') === 'true') {
             exibirDashboard();
         }
@@ -220,6 +174,10 @@
         function fazerLogout() {
             sessionStorage.removeItem('adm_logado');
             location.reload();
+        }
+
+        function alterarStatusCadastro(novoStatus) {
+            alert("Status atualizado para: " + novoStatus);
         }
     </script>
 </body>
