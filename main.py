@@ -49,10 +49,12 @@ class AtualizarTarifasRequest(BaseModel):
     tarifa_km_base: float
     taxa_adicional_parada: float
 
-# --- Rota Inicial ---
-@app.get("/")
-def status_api():
-    return {"status": "online", "sistema": "De Passagem", "cidade": "Alagoinhas/BA"}
+from fastapi.responses import HTMLResponse
+
+@app.get("/", response_class=HTMLResponse)
+def home():
+    with open("index.html", "r", encoding="utf-8") as f:
+        return f.read()
 
 # --- Rotas do Passageiro e Motorista ---
 @app.post("/corridas/solicitar")
