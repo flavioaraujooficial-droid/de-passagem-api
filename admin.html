@@ -162,8 +162,12 @@
                 <div class="pt-2 border-t border-slate-800">
                     <p class="font-semibold text-gray-300 mb-2 text-xs">Modalidades Permitidas na Cidade:</p>
                     <div class="grid grid-cols-2 gap-2">
-                        <button class="bg-amber-500 text-slate-950 font-bold text-xs py-2 rounded-xl">👥 Compartilhada</button>
-                        <button class="bg-slate-800 text-gray-300 font-bold text-xs py-2 rounded-xl hover:bg-slate-700">🔒 Exclusiva</button>
+                        <button id="btn-compartilhada" onclick="selecionarModalidade('compartilhada')" class="bg-amber-500 text-slate-950 font-bold text-xs py-2 rounded-xl transition">
+                            👥 Compartilhada
+                        </button>
+                        <button id="btn-exclusiva" onclick="selecionarModalidade('exclusiva')" class="bg-slate-800 text-gray-300 font-bold text-xs py-2 rounded-xl hover:bg-slate-700 transition">
+                            🔒 Exclusiva
+                        </button>
                     </div>
                 </div>
             </div>
@@ -248,6 +252,19 @@
         function fazerLogout() {
             sessionStorage.removeItem('adm_logado');
             location.reload();
+        }
+
+        function selecionarModalidade(tipo) {
+            const btnComp = document.getElementById('btn-compartilhada');
+            const btnExcl = document.getElementById('btn-exclusiva');
+
+            if (tipo === 'exclusiva') {
+                btnExcl.className = "bg-amber-500 text-slate-950 font-bold text-xs py-2 rounded-xl transition";
+                btnComp.className = "bg-slate-800 text-gray-300 font-bold text-xs py-2 rounded-xl hover:bg-slate-700 transition";
+            } else {
+                btnComp.className = "bg-amber-500 text-slate-950 font-bold text-xs py-2 rounded-xl transition";
+                btnExcl.className = "bg-slate-800 text-gray-300 font-bold text-xs py-2 rounded-xl hover:bg-slate-700 transition";
+            }
         }
 
         function adicionarRota() {
