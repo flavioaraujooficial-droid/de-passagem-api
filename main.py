@@ -4,7 +4,7 @@ from fastapi.responses import HTMLResponse
 
 app = FastAPI(title="De Passagem API")
 
-# --- ROTA PASSAGEIRO (HOME) ---
+# --- ROTA PASSAGEIRO ---
 @app.get("/", response_class=HTMLResponse)
 def home():
     caminho = os.path.join(os.path.dirname(__file__), "index.html")
