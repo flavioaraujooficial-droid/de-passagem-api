@@ -3,296 +3,223 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>De Passagem - Central Operacional ADM</title>
+    <title>De Passagem - Mobilidade Urbana</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-slate-950 text-white font-sans antialiased min-h-screen flex items-center justify-center p-4">
+<body class="bg-slate-900 text-white font-sans antialiased overflow-x-hidden" onload="obterLocalizacaoGPS()">
 
-    <!-- 1. PROTEÇÃO DE ACESSO (LOGIN DO ADM) -->
-    <div id="login-screen" class="w-full max-w-sm bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-2xl space-y-6 text-center">
-        <div class="space-y-2">
-            <div class="w-16 h-16 bg-amber-500/10 border border-amber-500/30 rounded-full flex items-center justify-center mx-auto text-amber-400 text-2xl">
-                <i class="fa-solid fa-user-shield"></i>
-            </div>
-            <h1 class="text-xl font-black text-amber-400">Área Restrita ADM</h1>
-            <p class="text-xs text-gray-400">De Passagem - Operação Alagoinhas</p>
-        </div>
-
-        <form onsubmit="autenticarADM(event)" class="space-y-4">
-            <div class="text-left space-y-1">
-                <label class="text-xs font-semibold text-gray-300">Senha de Acesso:</label>
-                <input id="input-senha" type="password" placeholder="Digite a senha..." required class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-400">
-            </div>
-
-            <p id="msg-erro" class="hidden text-xs font-bold text-rose-500">Senha incorreta. Tente novamente.</p>
-
-            <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded-xl text-sm transition shadow-lg">
-                Acessar Painel
-            </button>
-        </form>
-    </div>
-
-    <!-- 2. PAINEL DE CONTROLE COMPLETO -->
-    <div id="admin-dashboard" class="hidden w-full max-w-5xl mx-auto py-4 space-y-6">
+    <main id="app-screen" class="min-h-screen flex flex-col max-w-md mx-auto bg-slate-950 relative p-4 space-y-4">
         
-        <!-- CABEÇALHO -->
-        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-800 pb-4">
-            <div>
-                <h1 class="text-2xl md:text-3xl font-black text-amber-400 tracking-wide flex items-center gap-2">
-                    <i class="fa-solid fa-sliders"></i> Central Operacional De Passagem
-                </h1>
-                <p class="text-xs md:text-sm text-gray-400 mt-1">Gestão de Segurança, Cadastros, Modais, Tarifas e Rotas - Alagoinhas/BA</p>
-            </div>
-            <div class="flex items-center gap-3">
-                <span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-xs px-3 py-1.5 rounded-full font-bold flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> Autenticado
-                </span>
-                <button onclick="fazerLogout()" class="bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 border border-rose-500/30 text-xs font-bold px-3 py-1.5 rounded-xl transition">
-                    <i class="fa-solid fa-right-from-bracket"></i> Sair
-                </button>
-            </div>
+        <header class="p-3 bg-slate-900 rounded-2xl border border-slate-800 flex justify-between items-center">
+            <span class="font-bold text-amber-400 text-lg">De Passagem</span>
+            <span id="status-gps-txt" class="text-xs text-amber-400 font-semibold animate-pulse">📍 Buscando GPS...</span>
         </header>
 
-        <!-- CHECAGEM DE SEGURANÇA E CADASTROS -->
-        <section class="bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-4">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                <h2 class="text-sm font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
-                    <i class="fa-solid fa-user-check"></i> Checagem de Segurança e Validação de Cadastros
-                </h2>
-                <span class="bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[11px] px-2.5 py-1 rounded-lg font-semibold">
-                    1 Pendente de Validação
-                </span>
-            </div>
-
-            <div class="space-y-3">
-                <div class="p-4 bg-slate-950 rounded-xl border border-slate-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
-                    <div class="space-y-1 text-xs">
-                        <div class="flex items-center gap-2">
-                            <span class="font-bold text-white text-sm">Flávio Santos Araújo</span>
-                            <span class="bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded text-[10px] font-bold">MOTORISTA</span>
-                        </div>
-                        <p class="text-gray-400">Veículo: <span class="text-gray-200">Ford Fiesta • Prata</span> | WhatsApp: <span class="text-gray-200">(75) 99999-9999</span></p>
-                        <p class="text-gray-500 text-[10px]">Verificação: CNH com EAR ok • Antecedentes Criminais Pendentes</p>
-                    </div>
-
-                    <div class="flex items-center gap-2 w-full md:w-auto">
-                        <button onclick="alert('Motorista Aprovado!')" class="flex-1 md:flex-initial bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/40 text-xs font-bold px-3 py-2 rounded-xl transition">
-                            <i class="fa-solid fa-check"></i> Aprovar
-                        </button>
-                        <button onclick="alert('Motorista Bloqueado!')" class="flex-1 md:flex-initial bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 border border-rose-500/40 text-xs font-bold px-3 py-2 rounded-xl transition">
-                            <i class="fa-solid fa-ban"></i> Bloquear
-                        </button>
-                    </div>
+        <!-- PAINEL DE CONFIGURAÇÃO / AJUSTE RÁPIDO DO APP (EM ABERTO) -->
+        <details class="bg-slate-900 p-3 rounded-xl border border-slate-800 text-xs text-gray-300">
+            <summary class="font-bold text-amber-400 cursor-pointer">⚙️ Ajustes de Taxa & Parâmetros (Admin)</summary>
+            <div class="mt-2 space-y-2 pt-2 border-t border-slate-800">
+                <div class="flex justify-between items-center">
+                    <span>Km Base Exclusiva:</span>
+                    <input id="cfg-km-base" type="number" value="4" class="w-16 bg-slate-950 border border-slate-700 rounded px-2 py-1 text-center text-white">
+                </div>
+                <div class="flex justify-between items-center">
+                    <span>Valor Base Exclusiva (R$):</span>
+                    <input id="cfg-val-base" type="number" value="10" class="w-16 bg-slate-950 border border-slate-700 rounded px-2 py-1 text-center text-white">
+                </div>
+                <div class="flex justify-between items-center">
+                    <span>Valor por Km Adicional (R$):</span>
+                    <input id="cfg-val-km" type="number" value="2.00" step="0.5" class="w-16 bg-slate-950 border border-slate-700 rounded px-2 py-1 text-center text-white">
+                </div>
+                <div class="flex justify-between items-center">
+                    <span>Valor Mín. Compartilhada (R$):</span>
+                    <input id="cfg-val-comp" type="number" value="16" class="w-16 bg-slate-950 border border-slate-700 rounded px-2 py-1 text-center text-white">
                 </div>
             </div>
-        </section>
+        </details>
 
-        <!-- GESTÃO DE MODAIS E REGRAS DE TARIFAS / VALORES -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- BUSCADOR -->
+        <div id="painel-busca" class="bg-slate-900 p-4 rounded-2xl border border-slate-800 shadow-xl space-y-4">
             
-            <!-- MODAIS PERMITIDOS -->
-            <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-4">
-                <h2 class="text-sm font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
-                    <i class="fa-solid fa-car-side"></i> Modais de Transporte Liberados
-                </h2>
-                <div class="space-y-3 text-xs">
-                    <label class="flex items-center justify-between p-3 bg-slate-950 rounded-xl border border-slate-800 cursor-pointer">
-                        <div class="flex items-center gap-3">
-                            <i class="fa-solid fa-car text-amber-400"></i>
-                            <div>
-                                <p class="font-bold text-white">Carro Passeio / Leve</p>
-                                <p class="text-[10px] text-gray-400">Até 4 passageiros (Atendimento padrão)</p>
-                            </div>
-                        </div>
-                        <input type="checkbox" checked class="w-4 h-4 accent-amber-500">
-                    </label>
-
-                    <label class="flex items-center justify-between p-3 bg-slate-950 rounded-xl border border-slate-800 cursor-pointer">
-                        <div class="flex items-center gap-3">
-                            <i class="fa-solid fa-van-shuttle text-amber-400"></i>
-                            <div>
-                                <p class="font-bold text-white">Van / Micro-ônibus</p>
-                                <p class="text-[10px] text-gray-400">Horários de pico e maior capacidade</p>
-                            </div>
-                        </div>
-                        <input type="checkbox" checked class="w-4 h-4 accent-amber-500">
-                    </label>
-
-                    <label class="flex items-center justify-between p-3 bg-slate-950 rounded-xl border border-slate-800 cursor-pointer">
-                        <div class="flex items-center gap-3">
-                            <i class="fa-solid fa-bus text-gray-500"></i>
-                            <div>
-                                <p class="font-bold text-gray-400">Ônibus Coletivo Pesado</p>
-                                <p class="text-[10px] text-gray-500">Desativado fora de pico</p>
-                            </div>
-                        </div>
-                        <input type="checkbox" class="w-4 h-4 accent-amber-500">
-                    </label>
-                </div>
+            <div class="space-y-1">
+                <label class="text-xs font-bold text-amber-400 flex items-center gap-1">
+                    <i class="fa-solid fa-location-dot"></i> Ponto de Embarque (GPS Automático):
+                </label>
+                <input id="input-origem" type="text" value="Obtendo sua localização em Alagoinhas..." class="w-full bg-slate-950 border border-amber-500/50 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
             </div>
 
-            <!-- TABELA COMPLETA DE VALORES E TAXAS -->
-            <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-4">
-                <h2 class="text-sm font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
-                    <i class="fa-solid fa-hand-holding-dollar"></i> Ajuste de Valores e Taxas da Plataforma
-                </h2>
-                <div class="grid grid-cols-2 gap-3 text-xs">
-                    <div>
-                        <label class="font-semibold text-gray-300">Taxa Social do App (Fixa):</label>
-                        <input type="text" value="R$ 1,00" class="w-full mt-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-amber-400 font-bold focus:outline-none">
-                    </div>
-
-                    <div>
-                        <label class="font-semibold text-gray-300">Tarifa Mínima (Bandeirada):</label>
-                        <input type="text" value="R$ 5,00" class="w-full mt-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-bold focus:outline-none">
-                    </div>
-
-                    <div>
-                        <label class="font-semibold text-gray-300">Valor por Km Rodado:</label>
-                        <input type="text" value="R$ 2,50 / km" class="w-full mt-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-bold focus:outline-none">
-                    </div>
-
-                    <div>
-                        <label class="font-semibold text-gray-300">Valor por Minuto Parado:</label>
-                        <input type="text" value="R$ 0,30 / min" class="w-full mt-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-bold focus:outline-none">
-                    </div>
-                </div>
-
-                <div class="pt-2 border-t border-slate-800">
-                    <p class="font-semibold text-gray-300 mb-2 text-xs">Modalidades Permitidas na Cidade:</p>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button id="btn-compartilhada" onclick="selecionarModalidade('compartilhada')" class="bg-amber-500 text-slate-950 font-bold text-xs py-2 rounded-xl transition">
-                            👥 Compartilhada
-                        </button>
-                        <button id="btn-exclusiva" onclick="selecionarModalidade('exclusiva')" class="bg-slate-800 text-gray-300 font-bold text-xs py-2 rounded-xl hover:bg-slate-700 transition">
-                            🔒 Exclusiva
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- 3. GESTÃO E ADIÇÃO DE NOVAS ROTAS EM ALAGOINHAS -->
-        <section class="bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-4">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 border-b border-slate-800 pb-3">
-                <h2 class="text-sm font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
-                    <i class="fa-solid fa-route"></i> Gestão de Rotas Urbanas de Alagoinhas
-                </h2>
-                <button onclick="salvarGeral()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs px-4 py-2 rounded-xl transition shadow-lg">
-                    Salvar Alterações
-                </button>
-            </div>
-
-            <!-- FORMULÁRIO DE ADICIONAR NOVA ROTA -->
-            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
-                <p class="text-xs font-bold text-gray-300 uppercase">➕ Cadastrar Nova Rota no Sistema</p>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                    <input id="nova-rota-nome" type="text" placeholder="Ex: Petrolar ➔ Centro" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400">
-                    <select id="nova-rota-demanda" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400">
-                        <option value="Alta">Demanda: Alta</option>
-                        <option value="Média">Demanda: Média</option>
-                        <option value="Baixa">Demanda: Regular/Baixa</option>
-                    </select>
-                    <button onclick="adicionarRota()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl py-2 transition">
-                        Adicionar Rota
+            <div class="space-y-1">
+                <label class="text-xs font-semibold text-gray-300">Para onde você vai?</label>
+                <div class="relative">
+                    <input id="input-destino" type="text" placeholder="Digite o destino (ex: UNEB Alagoinhas)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-400">
+                    <button onclick="calcularCorridaDinamica()" class="absolute right-2 top-2 bg-amber-500 text-slate-950 font-bold text-xs px-3 py-1.5 rounded-lg active:scale-95 transition">
+                        Calcular R$
                     </button>
                 </div>
             </div>
 
-            <!-- LISTA DE ROTAS ATIVAS -->
-            <div id="lista-rotas" class="space-y-3 text-xs">
-                <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 flex justify-between items-center">
-                    <div>
-                        <p class="font-bold text-white">Rota 01: Centro ➔ Rua do Catu / Barreiro</p>
-                        <p class="text-gray-400 text-[10px]">Demanda: Alta | Modalidade: Compartilhada (Carros + Vans)</p>
+            <!-- ATALHOS RÁPIDOS -->
+            <div class="grid grid-cols-2 gap-2 pt-1">
+                <button onclick="definirAtalho('UNEB Alagoinhas', 7.0)" class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-left text-xs hover:border-amber-500/40">
+                    <p class="font-bold text-white">🎓 UNEB (Viva Lagoas)</p>
+                    <p class="text-[10px] text-gray-400">~7.0 km • Alagoinhas</p>
+                </button>
+                <button onclick="definirAtalho('Centro - Praça Ruy Barbosa', 2.8)" class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-left text-xs hover:border-amber-500/40">
+                    <p class="font-bold text-white">🏙️ Centro</p>
+                    <p class="text-[10px] text-gray-400">~2.8 km • Alagoinhas</p>
+                </button>
+            </div>
+        </div>
+
+        <!-- ESTIMATIVA E MODALIDADES DE VALOR -->
+        <div id="card-resultado" class="hidden bg-slate-900 p-4 rounded-2xl border-2 border-amber-500 space-y-3 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                <span class="text-xs text-amber-400 uppercase font-bold">Opções de Viagem (Dinâmica Aberta)</span>
+                <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded font-bold">Alagoinhas/BA</span>
+            </div>
+
+            <div class="space-y-2 text-xs">
+                <p class="text-gray-300">Embarque: <span id="res-origem" class="font-semibold text-white"></span></p>
+                <p class="text-amber-400 font-bold">Destino (<span id="res-km">0</span> km): <span id="res-destino"></span></p>
+
+                <!-- OPÇÃO 1: EXCLUSIVA -->
+                <div onclick="selecionarOpcao('exclusiva')" id="box-exclusiva" class="p-3 bg-slate-950 rounded-xl border-2 border-amber-500 cursor-pointer space-y-1 transition">
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-white">🔒 Viagem Exclusiva (Individual)</span>
+                        <span id="preco-exclusiva" class="font-black text-amber-400 text-sm">R$ 10,00</span>
                     </div>
-                    <span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold px-2.5 py-1 rounded-md">Ativa</span>
+                    <p id="detalhe-exclusiva" class="text-[10px] text-gray-400">Direto ao destino.</p>
                 </div>
 
-                <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 flex justify-between items-center">
-                    <div>
-                        <p class="font-bold text-white">Rota 02: Praça Graciliano de Freitas ➔ Atacadão</p>
-                        <p class="text-gray-400 text-[10px]">Demanda: Média | Modalidade: Compartilhada / Exclusiva</p>
+                <!-- OPÇÃO 2: COMPARTILHADA (TAXA SOCIAL) -->
+                <div onclick="selecionarOpcao('compartilhada')" id="box-compartilhada" class="p-3 bg-slate-950 rounded-xl border border-slate-800 cursor-pointer space-y-1 transition">
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-white">👥 Viagem Compartilhada (Zigue-Zague)</span>
+                        <span id="preco-compartilhada" class="font-black text-emerald-400 text-sm">R$ 16,00</span>
                     </div>
-                    <span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold px-2.5 py-1 rounded-md">Ativa</span>
+                    <p id="detalhe-compartilhada" class="text-[10px] text-gray-400">Valor otimizado para garantir o ganho do motorista.</p>
                 </div>
             </div>
-        </section>
 
-    </div>
+            <button onclick="solicitarCorridaAPI()" id="btn-confirmar" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-3 rounded-xl text-sm transition shadow-lg mt-2">
+                CONFIRMAR VIAGEM SELECIONADA
+            </button>
+        </div>
+
+        <!-- STATUS EM TEMPO REAL -->
+        <div id="card-status-corrida" class="hidden bg-slate-900 p-5 rounded-2xl border-2 border-amber-500 space-y-4 text-center">
+            <div id="status-procurando" class="space-y-3 py-2">
+                <div class="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                <h3 class="text-base font-bold text-white">Buscando motorista na região...</h3>
+                <p id="status-modo-texto" class="text-xs text-gray-400">Aguardando motorista aceitar a chamada.</p>
+            </div>
+        </div>
+
+    </main>
 
     <script>
-        const SENHA_CORRETA = "admin123";
+        let modalidadeEscolhida = 'exclusiva';
+        let valorFinalCorrida = 10.00;
+        let kmGlobal = 4.0;
 
-        if (sessionStorage.getItem('adm_logado') === 'true') {
-            exibirDashboard();
-        }
-
-        function autenticarADM(event) {
-            event.preventDefault();
-            const senhaDigitada = document.getElementById('input-senha').value;
-            const msgErro = document.getElementById('msg-erro');
-
-            if (senhaDigitada === SENHA_CORRETA) {
-                sessionStorage.setItem('adm_logado', 'true');
-                exibirDashboard();
-            } else {
-                msgErro.classList.remove('hidden');
+        function obterLocalizacaoGPS() {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        document.getElementById('input-origem').value = `Condomínio Viva Lagoas (GPS Ativo)`;
+                        document.getElementById('status-gps-txt').innerText = "📍 GPS Conectado";
+                        document.getElementById('status-gps-txt').className = "text-xs text-emerald-400 font-semibold";
+                    },
+                    (error) => {
+                        document.getElementById('input-origem').value = "Condomínio Viva Lagoas";
+                        document.getElementById('status-gps-txt').innerText = "📍 Alagoinhas";
+                    }
+                );
             }
         }
 
-        function exibirDashboard() {
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('admin-dashboard').classList.remove('hidden');
-            document.body.className = "bg-slate-950 text-white font-sans antialiased min-h-screen p-4 md:p-8";
-        }
-
-        function fazerLogout() {
-            sessionStorage.removeItem('adm_logado');
-            location.reload();
-        }
-
-        function selecionarModalidade(tipo) {
-            const btnComp = document.getElementById('btn-compartilhada');
-            const btnExcl = document.getElementById('btn-exclusiva');
+        function selecionarOpcao(tipo) {
+            modalidadeEscolhida = tipo;
+            const boxExcl = document.getElementById('box-exclusiva');
+            const boxComp = document.getElementById('box-compartilhada');
 
             if (tipo === 'exclusiva') {
-                btnExcl.className = "bg-amber-500 text-slate-950 font-bold text-xs py-2 rounded-xl transition";
-                btnComp.className = "bg-slate-800 text-gray-300 font-bold text-xs py-2 rounded-xl hover:bg-slate-700 transition";
+                boxExcl.className = "p-3 bg-slate-950 rounded-xl border-2 border-amber-500 cursor-pointer space-y-1 transition";
+                boxComp.className = "p-3 bg-slate-950 rounded-xl border border-slate-800 cursor-pointer space-y-1 transition";
+                valorFinalCorrida = window.precoExclusivaCalc || 10.00;
             } else {
-                btnComp.className = "bg-amber-500 text-slate-950 font-bold text-xs py-2 rounded-xl transition";
-                btnExcl.className = "bg-slate-800 text-gray-300 font-bold text-xs py-2 rounded-xl hover:bg-slate-700 transition";
+                boxComp.className = "p-3 bg-slate-950 rounded-xl border-2 border-emerald-500 cursor-pointer space-y-1 transition";
+                boxExcl.className = "p-3 bg-slate-950 rounded-xl border border-slate-800 cursor-pointer space-y-1 transition";
+                valorFinalCorrida = window.precoCompartilhadaCalc || 16.00;
             }
         }
 
-        function adicionarRota() {
-            const nome = document.getElementById('nova-rota-nome').value;
-            const demanda = document.getElementById('nova-rota-demanda').value;
-
-            if (!nome) {
-                alert("Por favor, digite o nome da rota!");
-                return;
-            }
-
-            const lista = document.getElementById('lista-rotas');
-            const novaDiv = document.createElement('div');
-            novaDiv.className = "p-3 bg-slate-950 rounded-xl border border-slate-800 flex justify-between items-center";
-            novaDiv.innerHTML = `
-                <div>
-                    <p class="font-bold text-white">${nome}</p>
-                    <p class="text-gray-400 text-[10px]">Demanda: ${demanda} | Modalidade: Compartilhada / Exclusiva</p>
-                </div>
-                <span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold px-2.5 py-1 rounded-md">Ativa</span>
-            `;
-
-            lista.appendChild(novaDiv);
-            document.getElementById('nova-rota-nome').value = "";
+        function definirAtalho(destino, km) {
+            document.getElementById('input-destino').value = destino;
+            calcularCorridaDinamica(km);
         }
 
-        function salvarGeral() {
-            alert("✅ Todas as configurações e novas rotas foram salvas!");
+        function calcularCorridaDinamica(kmManual = null) {
+            const origem = document.getElementById('input-origem').value;
+            const destino = document.getElementById('input-destino').value;
+            if (!destino) return;
+
+            // Pega os parâmetros configuráveis em aberto
+            const kmBase = parseFloat(document.getElementById('cfg-km-base').value) || 4;
+            const valBase = parseFloat(document.getElementById('cfg-val-base').value) || 10;
+            const valKmAdicional = parseFloat(document.getElementById('cfg-val-km').value) || 2.0;
+            const valCompBase = parseFloat(document.getElementById('cfg-val-comp').value) || 16;
+
+            // Define a quilometragem (se veio do atalho ou gerada)
+            const km = kmManual || 7.0; // Padrão Viva Lagoas -> UNEB por exemplo
+            kmGlobal = km;
+
+            // Cálculo Exclusivo Flexível
+            let precoExclusiva = valBase;
+            if (km > kmBase) {
+                precoExclusiva += (km - kmBase) * valKmAdicional;
+            }
+
+            // Cálculo Compartilhado Flexível (Taxa Social Justa)
+            let precoCompartilhada = valCompBase;
+            if (km > kmBase) {
+                precoCompartilhada += (km - kmBase) * 1.5; // acréscimo menor na compartilhada
+            }
+
+            window.precoExclusivaCalc = precoExclusiva;
+            window.precoCompartilhadaCalc = precoCompartilhada;
+
+            document.getElementById('res-origem').innerText = origem;
+            document.getElementById('res-destino').innerText = destino;
+            document.getElementById('res-km').innerText = km.toFixed(1);
+            
+            document.getElementById('preco-exclusiva').innerText = `R$ ${precoExclusiva.toFixed(2).replace('.', ',')}`;
+            document.getElementById('preco-compartilhada').innerText = `R$ ${precoCompartilhada.toFixed(2).replace('.', ',')}`;
+
+            document.getElementById('card-resultado').classList.remove('hidden');
+        }
+
+        async function solicitarCorridaAPI() {
+            const origem = document.getElementById('input-origem').value;
+            const destino = document.getElementById('input-destino').value;
+
+            document.getElementById('painel-busca').classList.add('hidden');
+            document.getElementById('card-resultado').classList.add('hidden');
+            document.getElementById('card-status-corrida').classList.remove('hidden');
+            document.getElementById('status-modo-texto').innerText = `Modo: ${modalidadeEscolhida.toUpperCase()} - R$ ${valorFinalCorrida.toFixed(2)}`;
+
+            try {
+                await fetch('/corridas/solicitar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        passageiro: "Flávio",
+                        origem: origem,
+                        destino: `${modalidadeEscolhida.toUpperCase()}: ${destino} (${kmGlobal}km - R$ ${valorFinalCorrida.toFixed(2)})`
+                    })
+                });
+            } catch (err) {}
         }
     </script>
 </body>
