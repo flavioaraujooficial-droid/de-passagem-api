@@ -51,6 +51,7 @@ class AtualizarTarifasRequest(BaseModel):
 
 from fastapi.responses import HTMLResponse
 
+# --- Rota Inicial (Painel Administrativo) ---
 @app.get("/", response_class=HTMLResponse)
 def home():
     with open("index.html", "r", encoding="utf-8") as f:
