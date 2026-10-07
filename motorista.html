@@ -94,9 +94,8 @@
         let corridaAtualId = null;
         let destinoGlobalGPS = "";
 
-        // 1. BUSCAR CHAMADAS PENDENTES
         async function buscarCorridasPendentes() {
-            if (corridaAtualId) return; // Se já está em atendimento, não busca novas do radar
+            if (corridaAtualId) return;
 
             try {
                 const res = await fetch('/corridas/pendentes');
@@ -126,14 +125,11 @@
             } catch (err) {}
         }
 
-        // 2. MOTORISTA ACEITA A CHAMADA
         async function aceitarCorrida(id, passageiro, origem, destino) {
             corridaAtualId = id;
             destinoGlobalGPS = destino;
 
-            // Oculta radar e mostra painel de deslocamento até o passageiro
             document.getElementById('secao-radar').classList.add('hidden');
-            
             document.getElementById('ativo-passageiro').innerText = passageiro;
             document.getElementById('ativo-origem').innerText = origem;
             document.getElementById('ativo-destino').innerText = destino;
@@ -148,21 +144,16 @@
             } catch (err) {}
         }
 
-        // 3. VALIDA PIN, INICIA CORRIDA E ABRE GPS
         function validarPinEIniciarViagem() {
             const pin = document.getElementById('input-pin-seguranca').value.trim();
-
             if (pin.length < 4) {
                 alert("Por favor, digite o PIN de 4 dígitos do passageiro.");
                 return;
             }
 
-            // Alterna para o painel "Em Viagem"
             document.getElementById('painel-corrida-ativa').classList.add('hidden');
             document.getElementById('viagem-destino-txt').innerText = destinoGlobalGPS;
             document.getElementById('painel-em-viagem').classList.remove('hidden');
-
-            // Dispara o navegador GPS automaticamente para o destino
             reabrirGPS();
         }
 
@@ -171,7 +162,6 @@
             window.open(urlMaps, '_blank');
         }
 
-        // 4. FINALIZAR CORRIDA E VOLTAR AO RADAR
         function finalizarCorrida() {
             alert("Corrida finalizada com sucesso! Retornando ao radar da praça.");
             corridaAtualId = null;
@@ -194,7 +184,6 @@
             buscarCorridasPendentes();
         }
 
-        // Executa a verificação periódica a cada 2 segundos
         setInterval(buscarCorridasPendentes, 2000);
     </script>
 </body>
