@@ -3,223 +3,252 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>De Passagem - Mobilidade Urbana</title>
+    <title>De Passagem - Painel Administrativo Geral</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-slate-900 text-white font-sans antialiased overflow-x-hidden" onload="obterLocalizacaoGPS()">
+<body class="bg-slate-900 text-white font-sans antialiased overflow-x-hidden">
 
-    <main id="app-screen" class="min-h-screen flex flex-col max-w-md mx-auto bg-slate-950 relative p-4 space-y-4">
+    <main class="min-h-screen flex flex-col max-w-md mx-auto bg-slate-950 relative p-4 space-y-4 pb-12">
         
+        <!-- HEADER DO ADMIN -->
         <header class="p-3 bg-slate-900 rounded-2xl border border-slate-800 flex justify-between items-center">
-            <span class="font-bold text-amber-400 text-lg">De Passagem</span>
-            <span id="status-gps-txt" class="text-xs text-amber-400 font-semibold animate-pulse">📍 Buscando GPS...</span>
+            <div>
+                <span class="font-bold text-amber-400 text-base">Painel Admin</span>
+                <p class="text-[10px] text-gray-400">Controle Total da Praça</p>
+            </div>
+            <div class="space-x-1">
+                <a href="index.html" class="text-[10px] bg-slate-800 text-gray-300 px-2 py-1 rounded-lg">Home</a>
+                <a href="motorista.html" class="text-[10px] bg-slate-800 text-gray-300 px-2 py-1 rounded-lg">Motorista</a>
+            </div>
         </header>
 
-        <!-- PAINEL DE CONFIGURAÇÃO / AJUSTE RÁPIDO DO APP (EM ABERTO) -->
-        <details class="bg-slate-900 p-3 rounded-xl border border-slate-800 text-xs text-gray-300">
-            <summary class="font-bold text-amber-400 cursor-pointer">⚙️ Ajustes de Taxa & Parâmetros (Admin)</summary>
-            <div class="mt-2 space-y-2 pt-2 border-t border-slate-800">
-                <div class="flex justify-between items-center">
-                    <span>Km Base Exclusiva:</span>
-                    <input id="cfg-km-base" type="number" value="4" class="w-16 bg-slate-950 border border-slate-700 rounded px-2 py-1 text-center text-white">
-                </div>
-                <div class="flex justify-between items-center">
-                    <span>Valor Base Exclusiva (R$):</span>
-                    <input id="cfg-val-base" type="number" value="10" class="w-16 bg-slate-950 border border-slate-700 rounded px-2 py-1 text-center text-white">
-                </div>
-                <div class="flex justify-between items-center">
-                    <span>Valor por Km Adicional (R$):</span>
-                    <input id="cfg-val-km" type="number" value="2.00" step="0.5" class="w-16 bg-slate-950 border border-slate-700 rounded px-2 py-1 text-center text-white">
-                </div>
-                <div class="flex justify-between items-center">
-                    <span>Valor Mín. Compartilhada (R$):</span>
-                    <input id="cfg-val-comp" type="number" value="16" class="w-16 bg-slate-950 border border-slate-700 rounded px-2 py-1 text-center text-white">
-                </div>
-            </div>
-        </details>
+        <!-- NAVEGAÇÃO DE ABAS DO ADMIN -->
+        <div class="grid grid-cols-4 gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800 text-[11px] text-center font-bold">
+            <button onclick="mudarAba('tarifas')" id="tab-tarifas" class="py-2 rounded-lg bg-amber-500 text-slate-950 transition">Tarifas</button>
+            <button onclick="mudarAba('rotas')" id="tab-rotas" class="py-2 rounded-lg text-gray-400 hover:text-white transition">Rotas</button>
+            <button onclick="mudarAba('veiculos')" id="tab-veiculos" class="py-2 rounded-lg text-gray-400 hover:text-white transition">Frota</button>
+            <button onclick="mudarAba('usuarios')" id="tab-usuarios" class="py-2 rounded-lg text-gray-400 hover:text-white transition">Moderação</button>
+        </div>
 
-        <!-- BUSCADOR -->
-        <div id="painel-busca" class="bg-slate-900 p-4 rounded-2xl border border-slate-800 shadow-xl space-y-4">
-            
-            <div class="space-y-1">
-                <label class="text-xs font-bold text-amber-400 flex items-center gap-1">
-                    <i class="fa-solid fa-location-dot"></i> Ponto de Embarque (GPS Automático):
-                </label>
-                <input id="input-origem" type="text" value="Obtendo sua localização em Alagoinhas..." class="w-full bg-slate-950 border border-amber-500/50 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
-            </div>
+        <!-- CONTEÚDO 1: TARIFAS E REGRAS DE PRECIFICAÇÃO -->
+        <div id="secao-tarifas" class="space-y-4">
+            <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 space-y-3 shadow-xl">
+                <h2 class="text-xs font-bold text-amber-400 uppercase flex items-center gap-1.5">
+                    <i class="fa-solid fa-sliders"></i> Precificação e Taxas
+                </h2>
 
-            <div class="space-y-1">
-                <label class="text-xs font-semibold text-gray-300">Para onde você vai?</label>
-                <div class="relative">
-                    <input id="input-destino" type="text" placeholder="Digite o destino (ex: UNEB Alagoinhas)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-400">
-                    <button onclick="calcularCorridaDinamica()" class="absolute right-2 top-2 bg-amber-500 text-slate-950 font-bold text-xs px-3 py-1.5 rounded-lg active:scale-95 transition">
-                        Calcular R$
+                <div class="space-y-2.5 text-xs">
+                    <div class="flex justify-between items-center bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                        <span>Km Base Exclusiva:</span>
+                        <input id="adm-km-base" type="number" value="4" class="w-16 bg-slate-900 border border-slate-700 rounded p-1 text-center font-bold text-white">
+                    </div>
+                    <div class="flex justify-between items-center bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                        <span>Valor Base Exclusiva (R$):</span>
+                        <input id="adm-val-base" type="number" value="15" class="w-16 bg-slate-900 border border-slate-700 rounded p-1 text-center font-bold text-white">
+                    </div>
+                    <div class="flex justify-between items-center bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                        <span>Km Adicional Exclusiva (R$):</span>
+                        <input id="adm-val-km" type="number" step="0.5" value="2.50" class="w-16 bg-slate-900 border border-slate-700 rounded p-1 text-center font-bold text-white">
+                    </div>
+                    <div class="flex justify-between items-center bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                        <span>Viagem Compartilhada (R$):</span>
+                        <input id="adm-val-comp" type="number" value="5.00" class="w-16 bg-slate-900 border border-slate-700 rounded p-1 text-center font-bold text-white">
+                    </div>
+                </div>
+
+                <button onclick="salvarParametrosAdmin()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-2.5 rounded-xl text-xs transition shadow-lg">
+                    Salvar Tarifas
+                </button>
+                <p id="msg-sucesso" class="text-[10px] text-emerald-400 text-center hidden font-bold">✅ Tarifas atualizadas com sucesso!</p>
+            </div>
+        </div>
+
+        <!-- CONTEÚDO 2: GERENCIAMENTO E ADIÇÃO DE ROTAS -->
+        <div id="secao-rotas" class="hidden space-y-4">
+            <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 space-y-3 shadow-xl">
+                <h2 class="text-xs font-bold text-amber-400 uppercase flex items-center gap-1.5">
+                    <i class="fa-solid fa-route"></i> Adicionar / Gerenciar Rotas
+                </h2>
+
+                <div class="space-y-2 text-xs">
+                    <div>
+                        <label class="text-gray-400 text-[10px]">Nome da Rota / Destino (ex: UNEB / Praça da Bandeira):</label>
+                        <input id="nova-rota-nome" type="text" placeholder="Ex: Campus UNEB Alagoinhas" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white">
+                    </div>
+                    <div class="flex gap-2">
+                        <div class="w-1/2">
+                            <label class="text-gray-400 text-[10px]">Distância estimada (Km):</label>
+                            <input id="nova-rota-km" type="number" step="0.1" placeholder="7.0" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white">
+                        </div>
+                        <div class="w-1/2">
+                            <label class="text-gray-400 text-[10px]">Categoria Prioritária:</label>
+                            <select id="nova-rota-cat" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white">
+                                <option value="Faculdade">Faculdade</option>
+                                <option value="Trabalho">Trabalho</option>
+                                <option value="Igreja">Igreja</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button onclick="adicionarRota()" class="w-full bg-amber-500 text-slate-950 font-bold py-2 rounded-lg text-xs mt-1">
+                        + Cadastrar Nova Rota
                     </button>
                 </div>
-            </div>
 
-            <!-- ATALHOS RÁPIDOS -->
-            <div class="grid grid-cols-2 gap-2 pt-1">
-                <button onclick="definirAtalho('UNEB Alagoinhas', 7.0)" class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-left text-xs hover:border-amber-500/40">
-                    <p class="font-bold text-white">🎓 UNEB (Viva Lagoas)</p>
-                    <p class="text-[10px] text-gray-400">~7.0 km • Alagoinhas</p>
-                </button>
-                <button onclick="definirAtalho('Centro - Praça Ruy Barbosa', 2.8)" class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-left text-xs hover:border-amber-500/40">
-                    <p class="font-bold text-white">🏙️ Centro</p>
-                    <p class="text-[10px] text-gray-400">~2.8 km • Alagoinhas</p>
-                </button>
+                <div class="pt-2 border-t border-slate-800 space-y-2">
+                    <p class="text-[11px] font-bold text-gray-300">Rotas Oficiais Ativas:</p>
+                    <div id="lista-rotas-admin" class="space-y-1 text-xs">
+                        <div class="bg-slate-950 p-2 rounded-xl border border-slate-800 flex justify-between items-center">
+                            <span>🎓 UNEB (Viva Lagoas) - 7.0 km</span>
+                            <span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded">Ativa</span>
+                        </div>
+                        <div class="bg-slate-950 p-2 rounded-xl border border-slate-800 flex justify-between items-center">
+                            <span>🏙️ Centro (Praça Ruy Barbosa) - 2.8 km</span>
+                            <span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded">Ativa</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- ESTIMATIVA E MODALIDADES DE VALOR -->
-        <div id="card-resultado" class="hidden bg-slate-900 p-4 rounded-2xl border-2 border-amber-500 space-y-3 shadow-2xl">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-                <span class="text-xs text-amber-400 uppercase font-bold">Opções de Viagem (Dinâmica Aberta)</span>
-                <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded font-bold">Alagoinhas/BA</span>
-            </div>
+        <!-- CONTEÚDO 3: TIPOS DE VEÍCULOS / FROTA -->
+        <div id="secao-veiculos" class="hidden space-y-4">
+            <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 space-y-3 shadow-xl">
+                <h2 class="text-xs font-bold text-amber-400 uppercase flex items-center gap-1.5">
+                    <i class="fa-solid fa-car"></i> Tipos de Veículos & Categorias
+                </h2>
 
-            <div class="space-y-2 text-xs">
-                <p class="text-gray-300">Embarque: <span id="res-origem" class="font-semibold text-white"></span></p>
-                <p class="text-amber-400 font-bold">Destino (<span id="res-km">0</span> km): <span id="res-destino"></span></p>
-
-                <!-- OPÇÃO 1: EXCLUSIVA -->
-                <div onclick="selecionarOpcao('exclusiva')" id="box-exclusiva" class="p-3 bg-slate-950 rounded-xl border-2 border-amber-500 cursor-pointer space-y-1 transition">
-                    <div class="flex justify-between items-center">
-                        <span class="font-bold text-white">🔒 Viagem Exclusiva (Individual)</span>
-                        <span id="preco-exclusiva" class="font-black text-amber-400 text-sm">R$ 10,00</span>
+                <div class="space-y-2 text-xs">
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-white">🚗 Sedan / Compacto (Ex: Ford Fiesta)</span>
+                            <span class="text-emerald-400 font-semibold text-[10px]">Ativo na Praça</span>
+                        </div>
+                        <p class="text-[10px] text-gray-400">Suporta modalidade Exclusiva e Lotação Compartilhada.</p>
                     </div>
-                    <p id="detalhe-exclusiva" class="text-[10px] text-gray-400">Direto ao destino.</p>
-                </div>
 
-                <!-- OPÇÃO 2: COMPARTILHADA (TAXA SOCIAL) -->
-                <div onclick="selecionarOpcao('compartilhada')" id="box-compartilhada" class="p-3 bg-slate-950 rounded-xl border border-slate-800 cursor-pointer space-y-1 transition">
-                    <div class="flex justify-between items-center">
-                        <span class="font-bold text-white">👥 Viagem Compartilhada (Zigue-Zague)</span>
-                        <span id="preco-compartilhada" class="font-black text-emerald-400 text-sm">R$ 16,00</span>
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-white">🚐 Van / Lotação Comunitária</span>
+                            <span class="text-amber-400 font-semibold text-[10px]">Planejado / Futuro</span>
+                        </div>
+                        <p class="text-[10px] text-gray-400">Focado exclusivamente em grandes fluxos (Zigue-Zague).</p>
                     </div>
-                    <p id="detalhe-compartilhada" class="text-[10px] text-gray-400">Valor otimizado para garantir o ganho do motorista.</p>
                 </div>
             </div>
-
-            <button onclick="solicitarCorridaAPI()" id="btn-confirmar" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-3 rounded-xl text-sm transition shadow-lg mt-2">
-                CONFIRMAR VIAGEM SELECIONADA
-            </button>
         </div>
 
-        <!-- STATUS EM TEMPO REAL -->
-        <div id="card-status-corrida" class="hidden bg-slate-900 p-5 rounded-2xl border-2 border-amber-500 space-y-4 text-center">
-            <div id="status-procurando" class="space-y-3 py-2">
-                <div class="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-                <h3 class="text-base font-bold text-white">Buscando motorista na região...</h3>
-                <p id="status-modo-texto" class="text-xs text-gray-400">Aguardando motorista aceitar a chamada.</p>
+        <!-- CONTEÚDO 4: APROVAÇÃO, REPROVAÇÃO E BLOQUEIO (MODERAÇÃO) -->
+        <div id="secao-usuarios" class="hidden space-y-4">
+            <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 space-y-3 shadow-xl">
+                <h2 class="text-xs font-bold text-amber-400 uppercase flex items-center gap-1.5">
+                    <i class="fa-solid fa-shield-halved"></i> Moderação & Controle de Acesso
+                </h2>
+
+                <p class="text-[11px] text-gray-400">Aprove novos cadastros ou bloqueie contas que violem as regras da comunidade.</p>
+
+                <div class="space-y-2 text-xs">
+                    <!-- MOTORISTA PENDENTE -->
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="font-bold text-white">Motorista: Carlos Silva</p>
+                                <p class="text-[10px] text-gray-400">Veículo: Corsa Prata • Alagoinhas</p>
+                            </div>
+                            <span class="bg-amber-500/20 text-amber-400 text-[10px] px-2 py-0.5 rounded font-bold">Pendente</span>
+                        </div>
+                        <div class="flex gap-2 pt-1">
+                            <button onclick="acaoModeracao(this, 'Aprovado')" class="w-1/2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-1.5 rounded-lg text-[11px]">Aprovar</button>
+                            <button onclick="acaoModeracao(this, 'Rejeitado')" class="w-1/2 bg-rose-500/20 text-rose-400 font-bold py-1.5 rounded-lg text-[11px]">Rejeitar</button>
+                        </div>
+                    </div>
+
+                    <!-- PASSAGEIRO ATIVO / BLOQUEIO -->
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="font-bold text-white">Passageiro: João Pereira</p>
+                                <p class="text-[10px] text-gray-400">Cadastrado em: Zona Norte</p>
+                            </div>
+                            <span class="bg-emerald-500/20 text-emerald-400 text-[10px] px-2 py-0.5 rounded font-bold">Ativo</span>
+                        </div>
+                        <button onclick="acaoModeracao(this, 'Bloqueado')" class="w-full bg-slate-900 border border-rose-500/50 text-rose-400 font-bold py-1.5 rounded-lg text-[11px] hover:bg-rose-500/10">
+                            Bloquear Usuário
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 
     </main>
 
     <script>
-        let modalidadeEscolhida = 'exclusiva';
-        let valorFinalCorrida = 10.00;
-        let kmGlobal = 4.0;
+        // Sistema de Abas
+        function mudarAba(aba) {
+            ['tarifas', 'rotas', 'veiculos', 'usuarios'].forEach(t => {
+                document.getElementById(`secao-${t}`).classList.add('hidden');
+                document.getElementById(`tab-${t}`).className = "py-2 rounded-lg text-gray-400 hover:text-white transition";
+            });
 
-        function obterLocalizacaoGPS() {
-            if ("geolocation" in navigator) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        document.getElementById('input-origem').value = `Condomínio Viva Lagoas (GPS Ativo)`;
-                        document.getElementById('status-gps-txt').innerText = "📍 GPS Conectado";
-                        document.getElementById('status-gps-txt').className = "text-xs text-emerald-400 font-semibold";
-                    },
-                    (error) => {
-                        document.getElementById('input-origem').value = "Condomínio Viva Lagoas";
-                        document.getElementById('status-gps-txt').innerText = "📍 Alagoinhas";
-                    }
-                );
-            }
+            document.getElementById(`secao-${aba}`).classList.remove('hidden');
+            document.getElementById(`tab-${aba}`).className = "py-2 rounded-lg bg-amber-500 text-slate-950 font-bold transition";
         }
 
-        function selecionarOpcao(tipo) {
-            modalidadeEscolhida = tipo;
-            const boxExcl = document.getElementById('box-exclusiva');
-            const boxComp = document.getElementById('box-compartilhada');
+        // Salvar Tarifas
+        function salvarParametrosAdmin() {
+            const config = {
+                kmBase: document.getElementById('adm-km-base').value,
+                valBase: document.getElementById('adm-val-base').value,
+                valKm: document.getElementById('adm-val-km').value,
+                valComp: document.getElementById('adm-val-comp').value
+            };
+            localStorage.setItem('depassagem_config', JSON.stringify(config));
 
-            if (tipo === 'exclusiva') {
-                boxExcl.className = "p-3 bg-slate-950 rounded-xl border-2 border-amber-500 cursor-pointer space-y-1 transition";
-                boxComp.className = "p-3 bg-slate-950 rounded-xl border border-slate-800 cursor-pointer space-y-1 transition";
-                valorFinalCorrida = window.precoExclusivaCalc || 10.00;
-            } else {
-                boxComp.className = "p-3 bg-slate-950 rounded-xl border-2 border-emerald-500 cursor-pointer space-y-1 transition";
-                boxExcl.className = "p-3 bg-slate-950 rounded-xl border border-slate-800 cursor-pointer space-y-1 transition";
-                valorFinalCorrida = window.precoCompartilhadaCalc || 16.00;
-            }
+            const msg = document.getElementById('msg-sucesso');
+            msg.classList.remove('hidden');
+            setTimeout(() => msg.classList.add('hidden'), 3000);
         }
 
-        function definirAtalho(destino, km) {
-            document.getElementById('input-destino').value = destino;
-            calcularCorridaDinamica(km);
-        }
+        // Adicionar Rota Dinâmica
+        function adicionarRota() {
+            const nome = document.getElementById('nova-rota-nome').value.trim();
+            const km = document.getElementById('nova-rota-km').value;
+            const cat = document.getElementById('nova-rota-cat').value;
 
-        function calcularCorridaDinamica(kmManual = null) {
-            const origem = document.getElementById('input-origem').value;
-            const destino = document.getElementById('input-destino').value;
-            if (!destino) return;
-
-            // Pega os parâmetros configuráveis em aberto
-            const kmBase = parseFloat(document.getElementById('cfg-km-base').value) || 4;
-            const valBase = parseFloat(document.getElementById('cfg-val-base').value) || 10;
-            const valKmAdicional = parseFloat(document.getElementById('cfg-val-km').value) || 2.0;
-            const valCompBase = parseFloat(document.getElementById('cfg-val-comp').value) || 16;
-
-            // Define a quilometragem (se veio do atalho ou gerada)
-            const km = kmManual || 7.0; // Padrão Viva Lagoas -> UNEB por exemplo
-            kmGlobal = km;
-
-            // Cálculo Exclusivo Flexível
-            let precoExclusiva = valBase;
-            if (km > kmBase) {
-                precoExclusiva += (km - kmBase) * valKmAdicional;
+            if (!nome || !km) {
+                alert("Preencha o nome e a distância da rota.");
+                return;
             }
 
-            // Cálculo Compartilhado Flexível (Taxa Social Justa)
-            let precoCompartilhada = valCompBase;
-            if (km > kmBase) {
-                precoCompartilhada += (km - kmBase) * 1.5; // acréscimo menor na compartilhada
-            }
-
-            window.precoExclusivaCalc = precoExclusiva;
-            window.precoCompartilhadaCalc = precoCompartilhada;
-
-            document.getElementById('res-origem').innerText = origem;
-            document.getElementById('res-destino').innerText = destino;
-            document.getElementById('res-km').innerText = km.toFixed(1);
-            
-            document.getElementById('preco-exclusiva').innerText = `R$ ${precoExclusiva.toFixed(2).replace('.', ',')}`;
-            document.getElementById('preco-compartilhada').innerText = `R$ ${precoCompartilhada.toFixed(2).replace('.', ',')}`;
-
-            document.getElementById('card-resultado').classList.remove('hidden');
+            const lista = document.getElementById('lista-rotas-admin');
+            lista.innerHTML += `
+                <div class="bg-slate-950 p-2 rounded-xl border border-slate-800 flex justify-between items-center">
+                    <span>📍 ${nome} - ${km} km (${cat})</span>
+                    <span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded">Ativa</span>
+                </div>
+            `;
+            document.getElementById('nova-rota-nome').value = '';
+            document.getElementById('nova-rota-km').value = '';
+            alert("Rota cadastrada com sucesso!");
         }
 
-        async function solicitarCorridaAPI() {
-            const origem = document.getElementById('input-origem').value;
-            const destino = document.getElementById('input-destino').value;
+        // Simulação de Moderação
+        functionacaoModeracao = function(btn, status) {
+            const card = btn.closest('div.bg-slate-950');
+            card.style.opacity = '0.5';
+            alert(`Ação executada com sucesso: Status alterado para [${status}]`);
+        };
 
-            document.getElementById('painel-busca').classList.add('hidden');
-            document.getElementById('card-resultado').classList.add('hidden');
-            document.getElementById('card-status-corrida').classList.remove('hidden');
-            document.getElementById('status-modo-texto').innerText = `Modo: ${modalidadeEscolhida.toUpperCase()} - R$ ${valorFinalCorrida.toFixed(2)}`;
-
-            try {
-                await fetch('/corridas/solicitar', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        passageiro: "Flávio",
-                        origem: origem,
-                        destino: `${modalidadeEscolhida.toUpperCase()}: ${destino} (${kmGlobal}km - R$ ${valorFinalCorrida.toFixed(2)})`
-                    })
-                });
-            } catch (err) {}
+        // Carregar salvos ao abrir
+        window.onload = function() {
+            const salva = localStorage.getItem('depassagem_config');
+            if (salva) {
+                const c = JSON.parse(salva);
+                if(c.kmBase) document.getElementById('adm-km-base').value = c.kmBase;
+                if(c.valBase) document.getElementById('adm-val-base').value = c.valBase;
+                if(c.valKm) document.getElementById('adm-val-km').value = c.valKm;
+                if(c.valComp) document.getElementById('adm-val-comp').value = c.valComp;
+            }
         }
     </script>
 </body>
