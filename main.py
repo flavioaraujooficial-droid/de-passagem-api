@@ -1,6 +1,7 @@
 from datetime import datetime
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
 from database import supabase
 
@@ -15,7 +16,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- Estruturas de dados ---
+# --- Estruturas de dados (Pydantic Models) ---
 class SolicitarCorridaRequest(BaseModel):
     usuario_id: str
     origem_endereco: str
@@ -49,9 +50,14 @@ class AtualizarTarifasRequest(BaseModel):
     tarifa_km_base: float
     taxa_adicional_parada: float
 
-from fastapi.responses import HTMLResponse
+class SalvarLocalFavoritoRequest(BaseModel):
+    usuario_id: str
+    nome_local: str
+    endereco_completo: str
+    latitude: float
+    longitude: float
 
-# --- Rota Inicial (Painel Administrativo) ---
+# --- Rota Inicial (Painel Administrativo Web) ---
 @app.get("/", response_class=HTMLResponse)
 def home():
     with open("index.html", "r", encoding="utf-8") as f:
@@ -111,11 +117,29 @@ def avaliar_corrida(dados: AvaliarCorridaRequest):
     resposta = supabase.table("avaliacoes").insert(nova_avaliacao).execute()
     return {"mensagem": "Avaliação registrada com sucesso!", "detalhes": resposta.data[0]}
 
+# --- ROTAS DE LOCAIS FAVORITOS (Resiliência de GPS) ---
+
+@app.post("/locais-favoritos/salvar")
+def salvar_local_favorito(dados: SalvarLocalFavoritoRequest):
+    novo_local = {
+        "usuario_id": dados.usuario_id,
+        "nome_local": dados.nome_local,
+        "endereco_completo": dados.endereco_completo,
+        "latitude": dados.latitude,
+        "longitude": dados.longitude
+    }
+    resposta = supabase.table("locais_favoritos").insert(novo_local).execute()
+    return {"mensagem": "Local favorito salvo com sucesso!", "detalhes": resposta.data[0]}
+
+@app.get("/locais-favoritos/{usuario_id}")
+def listar_locais_favoritos(usuario_id: str):
+    resposta = supabase.table("locais_favoritos").select("*").eq("usuario_id", usuario_id).execute()
+    return {"locais": resposta.data}
+
 # --- ROTAS ADMINISTRATIVAS (Painel do Gestor) ---
 
 @app.get("/admin/dashboard")
 def resumo_dashboard():
-    # Busca resumo de métricas para o painel
     corridas = supabase.table("corridas").select("*").execute().data
     motoristas = supabase.table("motoristas").select("*").execute().data
     
@@ -150,7 +174,6 @@ def atualizar_tarifas(dados: AtualizarTarifasRequest):
         "tarifa_km_base": dados.tarifa_km_base,
         "taxa_adicional_parada": dados.taxa_adicional_parada
     }
-    # Atualiza a primeira linha da tabela de configurações
     config_id = supabase.table("configuracoes_sistema").select("id").limit(1).execute().data[0]["id"]
     resposta = supabase.table("configuracoes_sistema").update(novas_config).eq("id", config_id).execute()
     return {"mensagem": "Tarifas atualizadas com sucesso!", "configuracoes": resposta.data[0]}
